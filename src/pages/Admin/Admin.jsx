@@ -1,0 +1,872 @@
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  TrendingUp,
+  Users,
+  Layers,
+  Settings,
+  DollarSign,
+  Plus,
+  Trash2,
+  Edit2,
+  Check,
+  ChevronRight,
+  Eye,
+  LogOut,
+  Sparkles
+} from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import productService from "../../services/productService";
+import orderService from "../../services/orderService";
+import { PRODUCTS, CATEGORIES } from "../../constants/data";
+import Input from "../../components/Input/Input";
+import Button from "../../components/Button/Button";
+import Modal from "../../components/Modal/Modal";
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend
+} from "recharts";
+
+// Mock Analytical Data
+const SALES_DATA = [
+  { month: "Jan", revenue: 8400, orders: 120 },
+  { month: "Feb", revenue: 9200, orders: 150 },
+  { month: "Mar", revenue: 11400, orders: 210 },
+  { month: "Apr", revenue: 9800, orders: 180 },
+  { month: "May", revenue: 13500, orders: 310 },
+  { month: "Jun", revenue: 14890, orders: 420 },
+];
+
+const CATEGORY_DISTRIBUTION = [
+  { name: "Electronics", sales: 240 },
+  { name: "Fashion", sales: 180 },
+  { name: "Home", sales: 120 },
+  { name: "Sports", sales: 90 },
+  { name: "Grocery", sales: 150 },
+];
+
+export const Admin = () => {
+  const { user, isAdmin, logout, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  // Route protection
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login");
+    } else if (!isAdmin) {
+      navigate("/");
+    }
+  }, [isAuthenticated, isAdmin, navigate]);
+
+  // Sidebar Menu states
+  const [activeTab, setActiveTab] = useState("dashboard"); // 'dashboard' | 'products' | 'categories' | 'orders' | 'users' | 'settings'
+
+  // Admin Data states
+  const [productList, setProductList] = useState([]);
+  const [orderList, setOrderList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // CRUD Product Modals
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // Product Form states
+  const [productForm, setProductForm] = useState({
+    name: "",
+    price: "",
+    discount: "0",
+    category: "Electronics",
+    stock: "10",
+    description: "",
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d35e?q=80&w=600&auto=format&fit=crop"
+  });
+
+  // Fetch admin products and orders
+  const loadAdminData = async () => {
+    setLoading(true);
+    try {
+      const prodsResult = await productService.getProducts({ limit: 100 });
+      setProductList(prodsResult.products);
+
+      const orders = await orderService.getAllOrders();
+      setOrderList(orders);
+    } catch (err) {
+      console.error("Error loading admin data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAdmin) {
+      loadAdminData();
+    }
+  }, [isAdmin]);
+
+  const handleUpdateOrderStatus = async (orderId, newStatus) => {
+    try {
+      await orderService.updateOrderStatus(orderId, newStatus);
+      await loadAdminData();
+    } catch (err) {
+      console.error("Failed to update order status:", err);
+    }
+  };
+
+  // CRUD Products handlers using productService
+  const handleAddProductSubmit = async (e) => {
+    e.preventDefault();
+    const newProd = {
+      name: productForm.name,
+      price: parseFloat(productForm.price),
+      discount: parseInt(productForm.discount),
+      category: productForm.category,
+      stock: parseInt(productForm.stock),
+      description: productForm.description,
+      images: [productForm.image],
+      rating: 4.5,
+      reviews: []
+    };
+
+    try {
+      await productService.createProduct(newProd);
+      setIsAddModalOpen(false);
+      
+      // Reset Form
+      setProductForm({
+        name: "",
+        price: "",
+        discount: "0",
+        category: "Electronics",
+        stock: "10",
+        description: "",
+        image: "https://images.unsplash.com/photo-1505740420928-5e560c06d35e?q=80&w=600&auto=format&fit=crop"
+      });
+      
+      await loadAdminData();
+    } catch (err) {
+      console.error("Failed to create product:", err);
+      alert(err.message || "Failed to create product");
+    }
+  };
+
+  const handleEditProductClick = (prod) => {
+    setSelectedProduct(prod);
+    setProductForm({
+      name: prod.name,
+      price: prod.price.toString(),
+      discount: (prod.discount || 0).toString(),
+      category: prod.category,
+      stock: prod.stock.toString(),
+      description: prod.description,
+      image: prod.images?.[0] || prod.image || ""
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditProductSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedProduct) return;
+
+    const updatedData = {
+      name: productForm.name,
+      price: parseFloat(productForm.price),
+      discount: parseInt(productForm.discount),
+      category: productForm.category,
+      stock: parseInt(productForm.stock),
+      description: productForm.description,
+      images: [productForm.image]
+    };
+
+    try {
+      await productService.updateProduct(selectedProduct.id, updatedData);
+      setIsEditModalOpen(false);
+      setSelectedProduct(null);
+      await loadAdminData();
+    } catch (err) {
+      console.error("Failed to update product:", err);
+      alert(err.message || "Failed to update product");
+    }
+  };
+
+  const handleDeleteProduct = async (id) => {
+    if (window.confirm("Are you sure you want to delete this product listing?")) {
+      try {
+        await productService.deleteProduct(id);
+        await loadAdminData();
+      } catch (err) {
+        console.error("Failed to delete product:", err);
+        alert(err.message || "Failed to delete product");
+      }
+    }
+  };
+
+  const handleLogoutClick = async () => {
+    await logout();
+    navigate("/");
+  };
+
+  const menuItems = [
+    { id: "dashboard", label: "Dashboard Overview", icon: LayoutDashboard },
+    { id: "products", label: "Manage Products", icon: ShoppingBag },
+    { id: "categories", label: "Category Analytics", icon: Layers },
+    { id: "orders", label: "Manage Orders", icon: Layers },
+    { id: "users", label: "Customers", icon: Users },
+    { id: "settings", label: "Admin Settings", icon: Settings }
+  ];
+
+  if (!user || !isAdmin) return null;
+
+  return (
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 overflow-hidden font-sans transition-colors">
+
+      {/* 1. ADMIN SIDEBAR */}
+      <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-slate-900 border-r border-slate-200/50 dark:border-slate-850 justify-between py-6 px-4 flex-shrink-0">
+        <div className="space-y-8 text-left">
+          {/* Logo */}
+          <div className="flex items-center space-x-2 px-2">
+            <span className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-extrabold text-lg shadow-sm">
+              Q
+            </span>
+            <span className="text-xl font-bold tracking-tight text-gradient-primary">
+              Admin Portal
+            </span>
+          </div>
+
+          {/* Menus */}
+          <div className="space-y-1">
+            {menuItems.map((item) => {
+              const MenuIcon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center space-x-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive
+                    ? "bg-primary text-white shadow-md shadow-primary/10"
+                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-slate-800 dark:hover:text-white"
+                    }`}
+                >
+                  <MenuIcon className="w-4.5 h-4.5" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Admin profiles & sign out */}
+        <div className="border-t border-slate-100 dark:border-slate-850 pt-4 space-y-3">
+          <div className="flex items-center space-x-3 px-2 text-left">
+            <img src={user.avatar} alt="" className="w-10 h-10 rounded-full border border-primary/20" />
+            <div className="min-w-0 flex-grow">
+              <p className="text-sm font-bold truncate text-slate-800 dark:text-white">{user.name}</p>
+              <p className="text-xs text-slate-400 truncate">Portal Administrator</p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleLogoutClick}
+            className="w-full flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-bold text-red-650 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all"
+          >
+            <LogOut className="w-4.5 h-4.5" />
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* 2. MAIN ADMIN CONTENT WRAPPER */}
+      <main className="flex-1 flex flex-col overflow-y-auto">
+        {/* Header toolbar */}
+        <header className="sticky top-0 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-850 py-4 px-6 sm:px-8 z-30 flex justify-between items-center text-left">
+          <div className="md:hidden flex items-center space-x-3">
+            {/* Small screen mobile logo */}
+            <span className="w-7 h-7 rounded-md bg-primary flex items-center justify-center text-white font-black text-sm">
+              Q
+            </span>
+            <span className="text-lg font-bold tracking-tight text-gradient-primary">
+              Admin Portal
+            </span>
+          </div>
+
+          <div className="hidden md:block">
+            <h2 className="text-xl font-bold font-sans text-slate-805 dark:text-white capitalize">
+              {activeTab} Overview
+            </h2>
+          </div>
+
+          {/* Quick links to shop */}
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => navigate("/")}
+              className="px-4 py-1.5 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-xl transition-all shadow-sm"
+            >
+              View Shop Frontend
+            </button>
+          </div>
+        </header>
+
+        {/* Tab contents pane */}
+        <div className="p-6 sm:p-8 space-y-8">
+
+          {/* TAB 1: DASHBOARD OVERVIEW */}
+          {activeTab === "dashboard" && (
+            <div className="space-y-8">
+              {/* Stat widgets cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
+                {/* Revenue card */}
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider">Total Revenue</span>
+                    <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg">
+                      <DollarSign className="w-5 h-5" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white font-sans">$14,890.00</h3>
+                    <p className="text-xs text-emerald-500 font-bold mt-1">+12% from last month</p>
+                  </div>
+                </div>
+
+                {/* Orders card */}
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-slate-455 dark:text-slate-500 font-bold uppercase tracking-wider">Completed Orders</span>
+                    <div className="p-2 bg-primary/10 text-primary rounded-lg">
+                      <ShoppingBag className="w-5 h-5" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white font-sans">420</h3>
+                    <p className="text-xs text-primary font-bold mt-1">+8% from last week</p>
+                  </div>
+                </div>
+
+                {/* Visitors card */}
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider">Site Visitors</span>
+                    <div className="p-2 bg-secondary/10 text-secondary rounded-lg">
+                      <Users className="w-5 h-5" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white font-sans">12,450</h3>
+                    <p className="text-xs text-secondary font-bold mt-1">+22% from last week</p>
+                  </div>
+                </div>
+
+                {/* Products card */}
+                <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-sm space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider">Catalog Products</span>
+                    <div className="p-2 bg-purple-500/10 text-purple-500 rounded-lg">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white font-sans">{productList.length} Active</h3>
+                    <p className="text-xs text-slate-400 font-bold mt-1">1 product out of stock</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Analytical Charts grids */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Revenue chart (Col span 2) */}
+                <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 p-6 rounded-3xl shadow-sm text-left">
+                  <h4 className="text-base font-bold text-slate-800 dark:text-white mb-6 font-sans">Monthly Revenue Performance ($)</h4>
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={SALES_DATA}>
+                        <defs>
+                          <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#2563EB" stopOpacity={0.2} />
+                            <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} />
+                        <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                        <Tooltip />
+                        <Area type="monotone" dataKey="revenue" stroke="#2563EB" strokeWidth={2.5} fillOpacity={1} fill="url(#colorRevenue)" name="Revenue" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Category distributions bar chart (Col span 1) */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 p-6 rounded-3xl shadow-sm text-left">
+                  <h4 className="text-base font-bold text-slate-800 dark:text-white mb-6 font-sans">Sales by Category</h4>
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={CATEGORY_DISTRIBUTION}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} />
+                        <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                        <Tooltip />
+                        <Bar dataKey="sales" fill="#0EA5E9" radius={[6, 6, 0, 0]} name="Orders" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+
+              {/* Recent Orders Overview table */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-6 shadow-sm text-left overflow-x-auto">
+                <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-850 mb-6">
+                  <h3 className="text-lg font-bold text-slate-800 dark:text-white font-sans">Recent Order History</h3>
+                  <button onClick={() => setActiveTab("orders")} className="text-xs text-primary hover:underline font-bold">
+                    Manage All Orders &rarr;
+                  </button>
+                </div>
+
+                <table className="w-full text-sm font-sans divide-y divide-slate-100 dark:divide-slate-850">
+                  <thead>
+                    <tr className="text-xs text-slate-400 font-bold uppercase tracking-wider text-left pb-3">
+                      <th className="py-3">Order ID</th>
+                      <th className="py-3">Date</th>
+                      <th className="py-3">Status</th>
+                      <th className="py-3">Total</th>
+                      <th className="py-3 text-right">Payment</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-850 text-slate-700 dark:text-slate-300">
+                    {orderList.slice(0, 5).map((ord) => (
+                      <tr key={ord.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
+                        <td className="py-3.5 font-bold text-slate-800 dark:text-white">{ord.id}</td>
+                        <td className="py-3.5">{ord.date}</td>
+                        <td className="py-3.5">
+                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold ${ord.status === "Delivered" ? "bg-emerald-500/10 text-emerald-500" : "bg-primary/10 text-primary"
+                            }`}>
+                            {ord.status}
+                          </span>
+                        </td>
+                        <td className="py-3.5 font-bold text-slate-800 dark:text-white">${ord.summary.total.toFixed(2)}</td>
+                        <td className="py-3.5 text-right font-medium">{ord.paymentMethod}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: PRODUCT CATALOGUE CRUD MANAGER */}
+          {activeTab === "products" && (
+            <div className="space-y-6 text-left">
+              <div className="flex justify-between items-center pb-4 border-b border-slate-200/50 dark:border-slate-850">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-800 dark:text-white font-sans">Manage Products</h3>
+                  <p className="text-xs text-slate-450 dark:text-slate-500 mt-1">Create, edit, or delete listings in the catalog</p>
+                </div>
+                <button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-xl text-sm font-bold flex items-center shadow-md shadow-primary/10 hover:shadow-primary/20"
+                >
+                  <Plus className="w-4 h-4 mr-1.5" />
+                  Add Product
+                </button>
+              </div>
+
+              {/* Table listings */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl shadow-sm overflow-x-auto">
+                <table className="w-full text-sm divide-y divide-slate-100 dark:divide-slate-850 text-left font-sans">
+                  <thead>
+                    <tr className="text-xs text-slate-400 font-bold uppercase tracking-wider p-4 border-b">
+                      <th className="p-4">Item Details</th>
+                      <th className="p-4">Category</th>
+                      <th className="p-4">Price</th>
+                      <th className="p-4">Discount</th>
+                      <th className="p-4">Stock</th>
+                      <th className="p-4 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-150 dark:divide-slate-850 text-slate-700 dark:text-slate-300">
+                    {productList.map((prod) => (
+                      <tr key={prod.id} className="hover:bg-slate-50/30 dark:hover:bg-slate-900/40">
+                        <td className="p-4 flex items-center space-x-3">
+                          <img
+                            src={prod.images?.[0] || prod.image}
+                            alt=""
+                            className="w-12 h-12 rounded-xl object-cover bg-slate-105"
+                          />
+                          <div className="min-w-0">
+                            <p className="font-bold text-slate-850 dark:text-white truncate max-w-[200px]">{prod.name}</p>
+                            <p className="text-xs text-slate-400">ID: {prod.id}</p>
+                          </div>
+                        </td>
+                        <td className="p-4 font-semibold text-slate-700 dark:text-slate-300">{prod.category}</td>
+                        <td className="p-4 font-extrabold text-slate-850 dark:text-white">${prod.price.toFixed(2)}</td>
+                        <td className="p-4 font-bold text-red-500">{prod.discount || 0}% OFF</td>
+                        <td className="p-4 font-semibold">
+                          <span className={`px-2 py-0.5 rounded-full text-xs ${prod.stock <= 0 ? "bg-red-500/10 text-red-500" : "bg-emerald-500/10 text-emerald-500"
+                            }`}>
+                            {prod.stock} Units
+                          </span>
+                        </td>
+                        <td className="p-4 text-center">
+                          <div className="flex items-center justify-center space-x-2">
+                            <button
+                              onClick={() => handleEditProductClick(prod)}
+                              className="p-1.5 rounded-lg border hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-primary transition-colors"
+                              title="Edit product"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(prod.id)}
+                              className="p-1.5 rounded-lg border hover:bg-red-50 dark:hover:bg-red-950/20 text-slate-550 hover:text-red-500 transition-colors"
+                              title="Delete product"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: CATEGORY ANALYTICS */}
+          {activeTab === "categories" && (
+            <div className="space-y-6 text-left">
+              <div className="border-b border-slate-100 dark:border-slate-850 pb-4">
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white font-sans">Category Analytics</h3>
+                <p className="text-xs text-slate-450 dark:text-slate-500 mt-1">Review category distribution counts</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {CATEGORIES.map((cat) => (
+                  <div key={cat.id} className="bg-white dark:bg-slate-900 border p-5 rounded-3xl flex items-center space-x-4 shadow-sm">
+                    <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center">
+                      <Layers className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-800 dark:text-white">{cat.name}</h4>
+                      <p className="text-xs text-slate-400 mt-1">{cat.count} Products Indexed</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: MANAGE ORDERS STATUS ENABLER */}
+          {activeTab === "orders" && (
+            <div className="space-y-6 text-left">
+              <div className="border-b border-slate-100 dark:border-slate-850 pb-4">
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white font-sans">Manage Customer Orders</h3>
+                <p className="text-xs text-slate-450 dark:text-slate-550 mt-1">Audit transactions and update shipping statuses</p>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 border border-slate-205 dark:border-slate-800 rounded-3xl shadow-sm overflow-x-auto">
+                <table className="w-full text-sm divide-y divide-slate-100 dark:divide-slate-850 font-sans">
+                  <thead>
+                    <tr className="text-xs text-slate-400 font-bold uppercase tracking-wider p-4 border-b">
+                      <th className="p-4">Order Ref</th>
+                      <th className="p-4">Customer Details</th>
+                      <th className="p-4">Items Count</th>
+                      <th className="p-4">Total Price</th>
+                      <th className="p-4">Active Status</th>
+                      <th className="p-4 text-center">Status Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-850 text-slate-700 dark:text-slate-350">
+                    {orderList.map((ord) => {
+                      const count = ord.items.reduce((acc, it) => acc + it.quantity, 0);
+                      return (
+                        <tr key={ord.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50">
+                          <td className="p-4 font-bold text-slate-900 dark:text-white">{ord.id}</td>
+                          <td className="p-4">
+                            <p className="font-bold text-slate-800 dark:text-white">{ord.shippingAddress.name}</p>
+                            <p className="text-xs text-slate-400">{ord.shippingAddress.city}, {ord.shippingAddress.state}</p>
+                          </td>
+                          <td className="p-4 font-semibold">{count} Items</td>
+                          <td className="p-4 font-extrabold text-slate-900 dark:text-white">${ord.summary.total.toFixed(2)}</td>
+                          <td className="p-4">
+                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold ${ord.status === "Delivered" ? "bg-emerald-500/10 text-emerald-500" : "bg-primary/10 text-primary animate-pulse"
+                              }`}>
+                              {ord.status}
+                            </span>
+                          </td>
+                          <td className="p-4 text-center">
+                            <select
+                              value={ord.status}
+                              onChange={(e) => handleUpdateOrderStatus(ord.id, e.target.value)}
+                              className="px-2 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none text-xs font-bold text-slate-700 dark:text-slate-300"
+                            >
+                              <option value="Processing">Processing</option>
+                              <option value="Shipped">Shipped</option>
+                              <option value="Delivered">Delivered</option>
+                            </select>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: USERS LISTINGS */}
+          {activeTab === "users" && (
+            <div className="space-y-6 text-left font-sans">
+              <div className="border-b border-slate-100 dark:border-slate-850 pb-4">
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white font-sans">Registered Customers</h3>
+                <p className="text-xs text-slate-450 dark:text-slate-500 mt-1">Manage portal member access</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="bg-white dark:bg-slate-900 border border-slate-150 p-5 rounded-3xl flex items-center space-x-3 shadow-sm">
+                  <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150&auto=format&fit=crop" alt="" className="w-12 h-12 rounded-full" />
+                  <div>
+                    <h4 className="font-bold text-slate-805 dark:text-white">John Doe</h4>
+                    <p className="text-xs text-slate-400">user@quickcart.com &bull; Customer Account</p>
+                  </div>
+                </div>
+
+                <div className="bg-white dark:bg-slate-900 border border-slate-150 p-5 rounded-3xl flex items-center space-x-3 shadow-sm">
+                  <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=150&auto=format&fit=crop" alt="" className="w-12 h-12 rounded-full" />
+                  <div>
+                    <h4 className="font-bold text-slate-805 dark:text-white">Admin User</h4>
+                    <p className="text-xs text-slate-405">admin@quickcart.com &bull; Super Administrator</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: ADMIN SETTINGS */}
+          {activeTab === "settings" && (
+            <div className="space-y-6 text-left font-sans">
+              <div className="border-b border-slate-100 dark:border-slate-850 pb-4">
+                <h3 className="text-xl font-bold text-slate-805 dark:text-white font-sans">Portal Configuration</h3>
+                <p className="text-xs text-slate-450 dark:text-slate-500 mt-1">Configure backend endpoints and credentials</p>
+              </div>
+
+              <div className="bg-white dark:bg-slate-900 border p-6 rounded-3xl space-y-4">
+                <Input
+                  label="VITE_API_URL Endpoint"
+                  value={import.meta.env.VITE_API_URL}
+                  disabled
+                />
+                <span className="text-[10px] text-slate-450 font-bold block">
+                  This values maps to AWS Cloud instances later. To connect DynamoDB/Lambda simply edit the config file.
+                </span>
+              </div>
+            </div>
+          )}
+
+        </div>
+      </main>
+
+      {/* CRUD 1: ADD PRODUCT MODAL */}
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="Add New Catalog Product"
+        size="lg"
+      >
+        <form onSubmit={handleAddProductSubmit} className="space-y-4 text-left font-sans">
+          <Input
+            label="Product Title"
+            value={productForm.name}
+            onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+            placeholder="e.g. Mechanical Keyboard"
+            required
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="Price ($)"
+              type="number"
+              value={productForm.price}
+              onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
+              placeholder="e.g. 89.99"
+              required
+            />
+            <Input
+              label="Discount (%)"
+              type="number"
+              value={productForm.discount}
+              onChange={(e) => setProductForm({ ...productForm, discount: e.target.value })}
+              placeholder="e.g. 10"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col space-y-1.5 text-left">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-350">Category</label>
+              <select
+                value={productForm.category}
+                onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none"
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c.id} value={c.name}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <Input
+              label="Stock Units"
+              type="number"
+              value={productForm.stock}
+              onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}
+              placeholder="e.g. 50"
+              required
+            />
+          </div>
+
+          <Input
+            label="Main Image URL"
+            value={productForm.image}
+            onChange={(e) => setProductForm({ ...productForm, image: e.target.value })}
+            placeholder="e.g. Unsplash URL"
+            required
+          />
+
+          <div className="flex flex-col space-y-1.5 text-left">
+            <label className="text-sm font-semibold text-slate-700 dark:text-slate-350">Product Description</label>
+            <textarea
+              value={productForm.description}
+              onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+              placeholder="Type description features..."
+              rows="4"
+              className="w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none"
+              required
+            />
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-4 border-t">
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              className="px-5 py-2.5 rounded-xl border text-slate-700 dark:text-slate-300 font-semibold"
+            >
+              Cancel
+            </button>
+            <Button type="submit">
+              Save Product
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* CRUD 2: EDIT PRODUCT MODAL */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedProduct(null);
+        }}
+        title="Edit Product Details"
+        size="lg"
+      >
+        {selectedProduct && (
+          <form onSubmit={handleEditProductSubmit} className="space-y-4 text-left font-sans">
+            <Input
+              label="Product Title"
+              value={productForm.name}
+              onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+              required
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="Price ($)"
+                type="number"
+                value={productForm.price}
+                onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
+                required
+              />
+              <Input
+                label="Discount (%)"
+                type="number"
+                value={productForm.discount}
+                onChange={(e) => setProductForm({ ...productForm, discount: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col space-y-1.5 text-left">
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-350">Category</label>
+                <select
+                  value={productForm.category}
+                  onChange={(e) => setProductForm({ ...productForm, category: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none"
+                >
+                  {CATEGORIES.map((c) => (
+                    <option key={c.id} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <Input
+                label="Stock Units"
+                type="number"
+                value={productForm.stock}
+                onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}
+                required
+              />
+            </div>
+
+            <Input
+              label="Main Image URL"
+              value={productForm.image}
+              onChange={(e) => setProductForm({ ...productForm, image: e.target.value })}
+              required
+            />
+
+            <div className="flex flex-col space-y-1.5 text-left">
+              <label className="text-sm font-semibold text-slate-700 dark:text-slate-350">Product Description</label>
+              <textarea
+                value={productForm.description}
+                onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                rows="4"
+                className="w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none"
+                required
+              />
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-4 border-t">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditModalOpen(false);
+                  setSelectedProduct(null);
+                }}
+                className="px-5 py-2.5 rounded-xl border text-slate-700 dark:text-slate-300 font-semibold"
+              >
+                Cancel
+              </button>
+              <Button type="submit">
+                Save Changes
+              </Button>
+            </div>
+          </form>
+        )}
+      </Modal>
+
+    </div>
+  );
+};
+
+export default Admin;
