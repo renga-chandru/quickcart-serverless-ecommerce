@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import authService from "../services/authService";
+import ticketService from "../services/ticketService";
 
 const AuthContext = createContext();
 
@@ -7,12 +8,25 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [unreadSupportCount, setUnreadSupportCount] = useState(0);
+
+  const fetchUnreadSupportCount = async () => {
+    try {
+      const count = await ticketService.getUnreadCount();
+      setUnreadSupportCount(count);
+    } catch (err) {
+      console.error("Error fetching unread support tickets:", err);
+    }
+  };
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const currentUser = authService.getCurrentUser();
       if (currentUser) {
         setUser(currentUser);
+        if (currentUser.role !== "admin") {
+          await fetchUnreadSupportCount();
+        }
       }
       setLoading(false);
     };
@@ -24,6 +38,9 @@ export const AuthProvider = ({ children }) => {
     try {
       const loggedUser = await authService.login(email, password);
       setUser(loggedUser);
+      if (loggedUser && loggedUser.role !== "admin") {
+        await fetchUnreadSupportCount();
+      }
       return loggedUser;
     } catch (err) {
       setError(err.message || "Authentication failed");
@@ -36,6 +53,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const registeredUser = await authService.signup(userData);
       setUser(registeredUser);
+      setUnreadSupportCount(0);
       return registeredUser;
     } catch (err) {
       setError(err.message || "Signup failed");
@@ -47,6 +65,7 @@ export const AuthProvider = ({ children }) => {
     try {
       await authService.logout();
       setUser(null);
+      setUnreadSupportCount(0);
     } catch (err) {
       console.error("Logout error:", err);
     }
@@ -75,6 +94,9 @@ export const AuthProvider = ({ children }) => {
         signup,
         logout,
         updateProfile,
+        unreadSupportCount,
+        setUnreadSupportCount,
+        fetchUnreadSupportCount,
       }}
     >
       {children}

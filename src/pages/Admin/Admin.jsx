@@ -15,11 +15,14 @@ import {
   ChevronRight,
   Eye,
   LogOut,
-  Sparkles
+  Sparkles,
+  MessageSquare,
+  Search
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import productService from "../../services/productService";
 import orderService from "../../services/orderService";
+import ticketService from "../../services/ticketService";
 import { PRODUCTS, CATEGORIES } from "../../constants/data";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
@@ -69,12 +72,22 @@ export const Admin = () => {
   }, [isAuthenticated, isAdmin, navigate]);
 
   // Sidebar Menu states
-  const [activeTab, setActiveTab] = useState("dashboard"); // 'dashboard' | 'products' | 'categories' | 'orders' | 'users' | 'settings'
+  const [activeTab, setActiveTab] = useState("dashboard"); // 'dashboard' | 'products' | 'categories' | 'orders' | 'users' | 'settings' | 'support'
 
   // Admin Data states
   const [productList, setProductList] = useState([]);
   const [orderList, setOrderList] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Support Tickets states
+  const [supportTickets, setSupportTickets] = useState([]);
+  const [loadingTickets, setLoadingTickets] = useState(false);
+  const [ticketSearch, setTicketSearch] = useState("");
+  const [ticketStatusFilter, setTicketStatusFilter] = useState("All");
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+  const [adminReplyText, setAdminReplyText] = useState("");
+  const [isReplying, setIsReplying] = useState(false);
 
   // CRUD Product Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -108,11 +121,78 @@ export const Admin = () => {
     }
   };
 
+  const fetchSupportTickets = async () => {
+    setLoadingTickets(true);
+    try {
+      const tickets = await ticketService.getAllTickets({
+        status: ticketStatusFilter,
+        search: ticketSearch
+      });
+      setSupportTickets(tickets);
+    } catch (err) {
+      console.error("Error loading support tickets:", err);
+    } finally {
+      setLoadingTickets(false);
+    }
+  };
+
   useEffect(() => {
     if (isAdmin) {
       loadAdminData();
     }
   }, [isAdmin]);
+
+  useEffect(() => {
+    if (isAdmin && activeTab === "support") {
+      fetchSupportTickets();
+    }
+  }, [isAdmin, activeTab, ticketStatusFilter]);
+
+  const handleOpenTicket = async (ticket) => {
+    setSelectedTicket(ticket);
+    setAdminReplyText(ticket.adminReply || "");
+    setIsTicketModalOpen(true);
+    if (ticket.status === "Unread") {
+      try {
+        const updated = await ticketService.updateStatus(ticket.id, "Read");
+        setSupportTickets(prev => prev.map(t => t.id === ticket.id ? updated : t));
+      } catch (err) {
+        console.error("Failed to mark ticket as read:", err);
+      }
+    }
+  };
+
+  const handleSaveReply = async (e) => {
+    e.preventDefault();
+    if (!adminReplyText.trim() || !selectedTicket) return;
+    setIsReplying(true);
+    try {
+      const updated = await ticketService.replyToTicket(selectedTicket.id, adminReplyText);
+      setSupportTickets(prev => prev.map(t => t.id === selectedTicket.id ? updated : t));
+      setIsTicketModalOpen(false);
+      setSelectedTicket(null);
+      setAdminReplyText("");
+      alert("Reply saved successfully!");
+    } catch (err) {
+      console.error("Failed to reply to ticket:", err);
+      alert(err.message || "Failed to save reply");
+    } finally {
+      setIsReplying(false);
+    }
+  };
+
+  const handleUpdateTicketStatus = async (ticketId, newStatus) => {
+    try {
+      const updated = await ticketService.updateStatus(ticketId, newStatus);
+      setSupportTickets(prev => prev.map(t => t.id === ticketId ? updated : t));
+      if (selectedTicket && selectedTicket.id === ticketId) {
+        setSelectedTicket(updated);
+      }
+    } catch (err) {
+      console.error("Failed to update ticket status:", err);
+      alert("Failed to update ticket status");
+    }
+  };
 
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
     try {
@@ -221,6 +301,7 @@ export const Admin = () => {
     { id: "products", label: "Manage Products", icon: ShoppingBag },
     { id: "categories", label: "Category Analytics", icon: Layers },
     { id: "orders", label: "Manage Orders", icon: Layers },
+    { id: "support", label: "Customer Messages", icon: MessageSquare },
     { id: "users", label: "Customers", icon: Users },
     { id: "settings", label: "Admin Settings", icon: Settings }
   ];
@@ -672,6 +753,152 @@ export const Admin = () => {
             </div>
           )}
 
+          {/* TAB 7: SUPPORT TICKETS & MESSAGES */}
+          {activeTab === "support" && (
+            <div className="space-y-6 text-left font-sans">
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-4 border-b border-slate-200/50 dark:border-slate-850">
+                <div>
+                  <h3 className="text-xl font-bold text-slate-805 dark:text-white font-sans">Support Tickets</h3>
+                  <p className="text-xs text-slate-450 dark:text-slate-500 mt-1">Read customer inquiries, reply to messages, and update status</p>
+                </div>
+
+                {/* Filter & Search actions */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <form onSubmit={(e) => { e.preventDefault(); fetchSupportTickets(); }} className="relative flex items-center">
+                    <input
+                      type="text"
+                      placeholder="Search tickets..."
+                      value={ticketSearch}
+                      onChange={(e) => setTicketSearch(e.target.value)}
+                      className="pl-9 pr-4 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none text-xs font-semibold text-slate-700 dark:text-slate-300 w-44 focus:w-60 transition-all duration-300"
+                    />
+                    <Search className="absolute left-3 w-3.5 h-3.5 text-slate-400" />
+                    <button type="submit" className="hidden" />
+                  </form>
+
+                  <select
+                    value={ticketStatusFilter}
+                    onChange={(e) => setTicketStatusFilter(e.target.value)}
+                    className="px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none text-xs font-bold text-slate-700 dark:text-slate-300"
+                  >
+                    <option value="All">All Statuses</option>
+                    <option value="Unread">Unread</option>
+                    <option value="Read">Read</option>
+                    <option value="Replied">Replied</option>
+                    <option value="Closed">Closed</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Table listings */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl shadow-sm overflow-x-auto">
+                <table className="w-full text-sm divide-y divide-slate-100 dark:divide-slate-850 text-left font-sans">
+                  <thead>
+                    <tr className="text-xs text-slate-400 font-bold uppercase tracking-wider p-4 border-b">
+                      <th className="p-4">Ticket ID</th>
+                      <th className="p-4">Date</th>
+                      <th className="p-4">Customer</th>
+                      <th className="p-4">Category</th>
+                      <th className="p-4">Priority</th>
+                      <th className="p-4">Subject</th>
+                      <th className="p-4">Status</th>
+                      <th className="p-4 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-155 dark:divide-slate-850 text-slate-700 dark:text-slate-300">
+                    {loadingTickets ? (
+                      <tr>
+                        <td colSpan="8" className="p-8 text-center text-slate-400 font-semibold font-sans">
+                          Loading support tickets...
+                        </td>
+                      </tr>
+                    ) : supportTickets.length === 0 ? (
+                      <tr>
+                        <td colSpan="8" className="p-8 text-center text-slate-400 font-semibold font-sans">
+                          No support tickets found.
+                        </td>
+                      </tr>
+                    ) : (
+                      supportTickets.map((t) => {
+                        let statusClass = "";
+                        switch (t.status) {
+                          case "Unread":
+                            statusClass = "bg-blue-500/10 text-blue-550 dark:text-blue-400";
+                            break;
+                          case "Read":
+                            statusClass = "bg-slate-500/10 text-slate-500 dark:text-slate-400";
+                            break;
+                          case "Replied":
+                            statusClass = "bg-amber-500/10 text-amber-555 dark:text-amber-450";
+                            break;
+                          case "Closed":
+                            statusClass = "bg-emerald-500/10 text-emerald-555 dark:text-emerald-450";
+                            break;
+                          default:
+                            statusClass = "bg-slate-500/10 text-slate-500";
+                        }
+
+                        return (
+                          <tr key={t.id} className="hover:bg-slate-50/30 dark:hover:bg-slate-900/40">
+                            <td className="p-4 font-bold text-primary font-sans">{t.id}</td>
+                            <td className="p-4 text-xs font-sans">
+                              {new Date(t.date).toLocaleDateString(undefined, {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit"
+                              })}
+                            </td>
+                            <td className="p-4 font-sans">
+                              <p className="font-bold text-slate-800 dark:text-white leading-tight">{t.userName}</p>
+                              <p className="text-xs text-slate-400">{t.userEmail}</p>
+                              {t.userId ? (
+                                <span className="inline-block text-[9px] bg-secondary/10 text-secondary px-1.5 py-0.2 rounded font-bold mt-1">Customer</span>
+                              ) : (
+                                <span className="inline-block text-[9px] bg-slate-100 dark:bg-slate-800 text-slate-500 px-1.5 py-0.2 rounded font-bold mt-1">Guest</span>
+                              )}
+                            </td>
+                            <td className="p-4 font-semibold text-slate-700 dark:text-slate-350 font-sans">
+                              {t.category || "Other"}
+                            </td>
+                            <td className="p-4 font-semibold font-sans">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                t.priority === "High"
+                                  ? "bg-red-500/10 text-red-650 dark:text-red-450"
+                                  : t.priority === "Medium"
+                                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-450"
+                                    : "bg-blue-500/10 text-blue-500 dark:text-blue-450"
+                              }`}>
+                                {t.priority || "Low"}
+                              </span>
+                            </td>
+                            <td className="p-4 font-semibold text-slate-700 dark:text-slate-300 max-w-[150px] truncate font-sans" title={t.subject}>
+                              {t.subject || "No Subject"}
+                            </td>
+                            <td className="p-4">
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold font-sans ${statusClass}`}>
+                                {t.status}
+                              </span>
+                            </td>
+                            <td className="p-4 text-center">
+                              <button
+                                onClick={() => handleOpenTicket(t)}
+                                className="px-3.5 py-1.5 rounded-xl border border-slate-205 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center justify-center mx-auto space-x-1"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>Open Ticket</span>
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
         </div>
       </main>
 
@@ -859,6 +1086,147 @@ export const Admin = () => {
               </button>
               <Button type="submit">
                 Save Changes
+              </Button>
+            </div>
+          </form>
+        )}
+      </Modal>
+
+      {/* SUPPORT TICKET DETAIL & REPLY MODAL */}
+      <Modal
+        isOpen={isTicketModalOpen}
+        onClose={() => {
+          setIsTicketModalOpen(false);
+          setSelectedTicket(null);
+        }}
+        title={selectedTicket ? `Support Ticket: ${selectedTicket.id}` : ""}
+        size="lg"
+      >
+        {selectedTicket && (
+          <form onSubmit={handleSaveReply} className="space-y-4 text-left font-sans">
+            {/* Header info card */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200/50 dark:border-slate-800/50">
+              <div className="space-y-1">
+                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Customer Details</span>
+                <p className="text-sm font-bold text-slate-800 dark:text-white">{selectedTicket.userName}</p>
+                <p className="text-xs text-slate-500">{selectedTicket.userEmail}</p>
+                {selectedTicket.userId && <p className="text-[10px] text-slate-400">User ID: {selectedTicket.userId}</p>}
+              </div>
+              <div className="space-y-1 sm:text-right">
+                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Ticket Properties</span>
+                <div className="flex flex-col sm:items-end gap-2 mt-1.5 font-sans">
+                  {/* Status Select */}
+                  <div className="flex items-center space-x-2 justify-end">
+                    <span className="text-[10px] text-slate-400">Status:</span>
+                    <select
+                      value={selectedTicket.status}
+                      onChange={(e) => handleUpdateTicketStatus(selectedTicket.id, { status: e.target.value })}
+                      className="px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none"
+                    >
+                      <option value="Unread">Unread</option>
+                      <option value="Read">Read</option>
+                      <option value="Replied">Replied</option>
+                      <option value="Closed">Closed</option>
+                    </select>
+                  </div>
+
+                  {/* Priority Select */}
+                  <div className="flex items-center space-x-2 justify-end">
+                    <span className="text-[10px] text-slate-400">Priority:</span>
+                    <select
+                      value={selectedTicket.priority || "Low"}
+                      onChange={(e) => handleUpdateTicketStatus(selectedTicket.id, { priority: e.target.value })}
+                      className="px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none"
+                    >
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                    </select>
+                  </div>
+
+                  {/* Category Select */}
+                  <div className="flex items-center space-x-2 justify-end">
+                    <span className="text-[10px] text-slate-400">Category:</span>
+                    <select
+                      value={selectedTicket.category || "Other"}
+                      onChange={(e) => handleUpdateTicketStatus(selectedTicket.id, { category: e.target.value })}
+                      className="px-2 py-1 text-xs font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg focus:outline-none"
+                    >
+                      <option value="Complaint">Complaint</option>
+                      <option value="Feedback">Feedback</option>
+                      <option value="Order Issue">Order Issue</option>
+                      <option value="Payment Issue">Payment Issue</option>
+                      <option value="Delivery Issue">Delivery Issue</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+                <p className="text-[10px] text-slate-400 block mt-2">
+                  Created: {new Date(selectedTicket.date).toLocaleString()}
+                </p>
+              </div>
+            </div>
+
+            {/* Subject */}
+            <div className="space-y-1">
+              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Subject</span>
+              <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                {selectedTicket.subject || "No Subject"}
+              </h4>
+            </div>
+
+            {/* Existing admin reply */}
+            {selectedTicket.adminReply && (
+              <div className="space-y-1 bg-primary/5 dark:bg-primary/10 border-l-4 border-primary p-4 rounded-xl text-sm font-sans">
+                <span className="text-[10px] uppercase font-bold text-primary dark:text-primary-light tracking-wider block">Existing Reply by {selectedTicket.adminName || "Admin"}</span>
+                <p className="text-slate-700 dark:text-slate-250 whitespace-pre-line leading-relaxed">{selectedTicket.adminReply}</p>
+                {selectedTicket.adminRepliedAt && (
+                  <p className="text-[10px] text-slate-405 dark:text-slate-500 text-right mt-1">
+                    Replied on {new Date(selectedTicket.adminRepliedAt).toLocaleString()}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Message */}
+            <div className="space-y-1">
+              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Message Details</span>
+              <p className="text-sm text-slate-700 dark:text-slate-350 bg-slate-50 dark:bg-slate-950/20 p-4 rounded-xl border border-slate-200/50 dark:border-slate-800/50 whitespace-pre-line leading-relaxed">
+                {selectedTicket.message}
+              </p>
+            </div>
+
+            {/* Admin reply input */}
+            <div className="flex flex-col space-y-1.5 pt-2 border-t">
+              <label className="text-sm font-bold text-slate-805 dark:text-white">
+                Admin Response Message
+              </label>
+              <textarea
+                value={adminReplyText}
+                onChange={(e) => setAdminReplyText(e.target.value)}
+                placeholder="Type reply or response details here..."
+                rows="5"
+                className="w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-sans"
+                required
+              />
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-4 border-t">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsTicketModalOpen(false);
+                  setSelectedTicket(null);
+                }}
+                className="px-5 py-2.5 rounded-xl border text-slate-700 dark:text-slate-300 font-semibold"
+              >
+                Close Ticket
+              </button>
+              <Button
+                type="submit"
+                isLoading={isReplying}
+              >
+                Send & Save Reply
               </Button>
             </div>
           </form>

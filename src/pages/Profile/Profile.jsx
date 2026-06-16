@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, ShoppingBag, Heart, MapPin, Settings, LogOut, Check, Save } from "lucide-react";
+import { User, ShoppingBag, Heart, MapPin, Settings, LogOut, Check, Save, MessageSquare, ChevronRight } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useWishlist } from "../../context/WishlistContext";
 import orderService from "../../services/orderService";
+import ticketService from "../../services/ticketService";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
 
 export const Profile = () => {
-  const { user, logout, updateProfile, isAuthenticated } = useAuth();
+  const { user, logout, updateProfile, isAuthenticated, unreadSupportCount, setUnreadSupportCount } = useAuth();
   const { wishlistItems } = useWishlist();
   const navigate = useNavigate();
 
@@ -20,9 +21,14 @@ export const Profile = () => {
   }, [isAuthenticated, navigate]);
 
   // Tab State
-  const [activeTab, setActiveTab] = useState("info"); // 'info' | 'orders' | 'wishlist' | 'addresses' | 'settings'
+  const [activeTab, setActiveTab] = useState("info"); // 'info' | 'orders' | 'wishlist' | 'addresses' | 'settings' | 'tickets'
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
+
+  // Support Tickets State
+  const [tickets, setTickets] = useState([]);
+  const [loadingTickets, setLoadingTickets] = useState(false);
+  const [expandedTicketId, setExpandedTicketId] = useState(null);
 
   // Form States
   const [name, setName] = useState(user?.name || "");
@@ -71,6 +77,47 @@ export const Profile = () => {
     }
   }, [activeTab]);
 
+  // Fetch tickets on tab select
+  useEffect(() => {
+    if (activeTab === "tickets") {
+      const fetchTickets = async () => {
+        setLoadingTickets(true);
+        try {
+          const list = await ticketService.getMyTickets();
+          setTickets(list);
+        } catch (err) {
+          console.error("Error fetching profile tickets:", err);
+        } finally {
+          setLoadingTickets(false);
+        }
+      };
+      fetchTickets();
+    }
+  }, [activeTab]);
+
+  const handleExpandTicket = async (ticketId, hasUnreadReply) => {
+    if (expandedTicketId === ticketId) {
+      setExpandedTicketId(null);
+    } else {
+      setExpandedTicketId(ticketId);
+      if (hasUnreadReply) {
+        try {
+          await ticketService.markAsRead(ticketId);
+          setTickets(prev =>
+            prev.map(t =>
+              t.id === ticketId
+                ? { ...t, userHasUnreadReply: false, status: t.status === "Replied" ? "Read" : t.status }
+                : t
+            )
+          );
+          setUnreadSupportCount(c => Math.max(0, c - 1));
+        } catch (err) {
+          console.error("Failed to mark support ticket as read:", err);
+        }
+      }
+    }
+  };
+
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setIsUpdating(true);
@@ -101,6 +148,7 @@ export const Profile = () => {
     { id: "orders", label: "Order History", icon: ShoppingBag },
     { id: "wishlist", label: "My Wishlist", icon: Heart },
     { id: "addresses", label: "Saved Addresses", icon: MapPin },
+    { id: "tickets", label: "Support Tickets", icon: MessageSquare },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -144,14 +192,23 @@ export const Profile = () => {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-350 ${
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-350 ${
                     isActive
                       ? "bg-primary text-white shadow-md shadow-primary/10"
                       : "text-slate-650 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/40"
                   }`}
                 >
-                  <MenuItemIcon className="w-4.5 h-4.5" />
-                  <span>{item.label}</span>
+                  <div className="flex items-center space-x-3">
+                    <MenuItemIcon className="w-4.5 h-4.5" />
+                    <span>{item.label}</span>
+                  </div>
+                  {item.id === "tickets" && unreadSupportCount > 0 && (
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      isActive ? "bg-white text-primary" : "bg-red-500 text-white"
+                    }`}>
+                      {unreadSupportCount}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -407,6 +464,154 @@ export const Profile = () => {
                     </label>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* 6. SUPPORT TICKETS */}
+            {activeTab === "tickets" && (
+              <div className="space-y-6">
+                <div className="border-b border-slate-100 dark:border-slate-850 pb-4">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-white font-sans">
+                    Support Tickets
+                  </h3>
+                  <p className="text-xs text-slate-450 dark:text-slate-500 mt-1">
+                    Track complaints, feedback, and view administrator responses.
+                  </p>
+                </div>
+
+                {loadingTickets ? (
+                  <div className="text-center py-10 font-bold text-slate-400 font-sans">Loading tickets...</div>
+                ) : tickets.length === 0 ? (
+                  <div className="text-center py-12 text-slate-400 font-semibold bg-slate-50 dark:bg-slate-950/20 rounded-2xl border border-dashed border-slate-250 font-sans">
+                    You have not submitted any support tickets yet.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {tickets.map((t) => {
+                      const isExpanded = expandedTicketId === t.id;
+                      const hasNewReply = t.userHasUnreadReply;
+                      const formattedDate = new Date(t.date).toLocaleDateString(undefined, {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit"
+                      });
+                      const formattedReplyDate = t.adminRepliedAt
+                        ? new Date(t.adminRepliedAt).toLocaleDateString(undefined, {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit"
+                          })
+                        : "";
+
+                      // Status style mapper
+                      let statusClass = "";
+                      switch (t.status) {
+                        case "Unread":
+                          statusClass = "bg-blue-500/10 text-blue-500";
+                          break;
+                        case "Read":
+                          statusClass = "bg-slate-500/10 text-slate-500 dark:text-slate-400";
+                          break;
+                        case "Replied":
+                          statusClass = "bg-amber-500/10 text-amber-550 dark:text-amber-400";
+                          break;
+                        case "Closed":
+                          statusClass = "bg-emerald-500/10 text-emerald-550 dark:text-emerald-450";
+                          break;
+                        default:
+                          statusClass = "bg-slate-500/10 text-slate-500";
+                      }
+
+                      return (
+                        <div
+                          key={t.id}
+                          className={`border rounded-2xl p-5 transition-all duration-350 bg-white dark:bg-slate-900 ${
+                            isExpanded
+                              ? "border-primary/30 ring-1 ring-primary/10 shadow-md"
+                              : "border-slate-150 dark:border-slate-800/80 hover:border-slate-350 dark:hover:border-slate-700 shadow-sm"
+                          }`}
+                        >
+                          <div
+                            onClick={() => handleExpandTicket(t.id, hasNewReply)}
+                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer"
+                          >
+                            <div className="space-y-1 flex-grow">
+                              <div className="flex items-center flex-wrap gap-2">
+                                <span className="text-xs font-bold text-primary font-sans">{t.id}</span>
+                                <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-650 dark:text-slate-350 px-2 py-0.5 rounded-full font-sans">
+                                  {t.category || "Other"}
+                                </span>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full font-sans ${
+                                  t.priority === "High"
+                                    ? "bg-red-500/10 text-red-650 dark:text-red-400"
+                                    : t.priority === "Medium"
+                                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                                      : "bg-blue-500/10 text-blue-500 dark:text-blue-400"
+                                }`}>
+                                  {t.priority || "Low"}
+                                </span>
+                                {hasNewReply && (
+                                  <span className="flex h-2 w-2 relative">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                  </span>
+                                )}
+                              </div>
+                              <h4 className="text-base font-bold text-slate-805 dark:text-white line-clamp-1">
+                                {t.subject || "No Subject"}
+                              </h4>
+                              <p className="text-xs text-slate-400 font-sans">Submitted: {formattedDate}</p>
+                            </div>
+                            
+                            <div className="flex items-center space-x-3 self-start sm:self-center">
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${statusClass}`}>
+                                {t.status}
+                              </span>
+                              <ChevronRight
+                                className={`w-4 h-4 text-slate-400 transition-transform duration-350 ${
+                                  isExpanded ? "rotate-90 text-primary" : ""
+                                }`}
+                              />
+                            </div>
+                          </div>
+
+                          {isExpanded && (
+                            <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 space-y-4 animate-in fade-in duration-200">
+                              <div className="space-y-1.5">
+                                <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider font-sans">Your Message</span>
+                                <p className="text-sm text-slate-650 dark:text-slate-300 whitespace-pre-line bg-slate-50/50 dark:bg-slate-950/20 p-4 rounded-xl border dark:border-slate-850 font-sans">
+                                  {t.message}
+                                </p>
+                              </div>
+
+                              {t.adminReply ? (
+                                <div className="space-y-1.5">
+                                  <span className="text-[10px] uppercase font-bold text-primary dark:text-primary-light tracking-wider font-sans">Administrator Reply</span>
+                                  <div className="bg-primary/5 dark:bg-primary/10 border-l-4 border-primary p-4 rounded-xl text-sm space-y-2">
+                                    <p className="text-slate-700 dark:text-slate-200 whitespace-pre-line leading-relaxed font-sans">
+                                      {t.adminReply}
+                                    </p>
+                                    <p className="text-[10px] text-slate-400 dark:text-slate-500 text-right font-sans">
+                                      Replied by <strong className="text-primary dark:text-primary-light font-sans">{t.adminName || "Administrator"}</strong> on {formattedReplyDate}
+                                    </p>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="bg-slate-50 dark:bg-slate-950/20 p-4 rounded-xl text-xs text-slate-400 dark:text-slate-500 border dark:border-slate-850 font-medium font-sans">
+                                  Our support specialists haven't replied to this ticket yet. We will notify you as soon as a reply is posted.
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
 

@@ -21,7 +21,7 @@ import { useTheme } from "../../context/ThemeContext";
 export const Navbar = () => {
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
-  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, logout, unreadSupportCount } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -147,7 +147,7 @@ export const Navbar = () => {
                 <div className="relative">
                   <button
                     onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                    className="flex items-center space-x-2 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                    className="flex items-center space-x-2 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors relative"
                   >
                     <img
                       src={user.avatar}
@@ -157,6 +157,9 @@ export const Navbar = () => {
                     <span className="text-sm font-semibold text-slate-700 dark:text-slate-350 max-w-[80px] truncate">
                       {user.name.split(" ")[0]}
                     </span>
+                    {unreadSupportCount > 0 && (
+                      <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-white dark:border-slate-900 animate-pulse" />
+                    )}
                   </button>
 
                   {isProfileDropdownOpen && (
@@ -187,10 +190,17 @@ export const Navbar = () => {
                         <Link
                           to="/profile"
                           onClick={() => setIsProfileDropdownOpen(false)}
-                          className="flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
+                          className="flex items-center justify-between px-4 py-2.5 rounded-xl text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
                         >
-                          <UserCheck className="w-4 h-4 text-secondary" />
-                          <span className="font-medium">My Profile</span>
+                          <div className="flex items-center space-x-3">
+                            <UserCheck className="w-4 h-4 text-secondary" />
+                            <span className="font-medium">My Profile</span>
+                          </div>
+                          {unreadSupportCount > 0 && (
+                            <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                              {unreadSupportCount}
+                            </span>
+                          )}
                         </Link>
 
                         <button
@@ -220,17 +230,23 @@ export const Navbar = () => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-650 dark:text-slate-350 transition-colors"
+              className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-650 dark:text-slate-350 transition-colors relative"
             >
               {isDark ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
+              {unreadSupportCount > 0 && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
+              )}
             </button>
 
             {/* Mobile menu trigger button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-850 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors"
+              className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-850 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 transition-colors relative"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {unreadSupportCount > 0 && !isMobileMenuOpen && (
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-white dark:border-slate-950" />
+              )}
             </button>
           </div>
         </div>
@@ -289,7 +305,7 @@ export const Navbar = () => {
             </div>
 
             {/* Mobile Profile Actions */}
-            <div className="border-t border-slate-100 dark:border-slate-800 pt-4 flex flex-col space-y-3">
+            <div className="border-t border-slate-100 dark:border-slate-880 pt-4 flex flex-col space-y-3">
               {isAuthenticated ? (
                 <>
                   <div className="flex items-center space-x-3 px-2">
@@ -318,10 +334,17 @@ export const Navbar = () => {
                   <Link
                     to="/profile"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center space-x-3 px-2 py-2 text-sm text-slate-700 dark:text-slate-300 font-medium"
+                    className="flex items-center justify-between px-2 py-2 text-sm text-slate-700 dark:text-slate-300 font-medium"
                   >
-                    <User className="w-4 h-4 text-secondary" />
-                    <span>My Profile</span>
+                    <div className="flex items-center space-x-3">
+                      <User className="w-4 h-4 text-secondary" />
+                      <span>My Profile</span>
+                    </div>
+                    {unreadSupportCount > 0 && (
+                      <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                        {unreadSupportCount}
+                      </span>
+                    )}
                   </Link>
                   
                   <button
