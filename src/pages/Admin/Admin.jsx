@@ -23,6 +23,7 @@ import { useAuth } from "../../context/AuthContext";
 import productService from "../../services/productService";
 import orderService from "../../services/orderService";
 import ticketService from "../../services/ticketService";
+import chatService from "../../services/chatService";
 import { PRODUCTS, CATEGORIES } from "../../constants/data";
 import Input from "../../components/Input/Input";
 import Button from "../../components/Button/Button";
@@ -73,6 +74,120 @@ export const Admin = () => {
 
   // Sidebar Menu states
   const [activeTab, setActiveTab] = useState("dashboard"); // 'dashboard' | 'products' | 'categories' | 'orders' | 'users' | 'settings' | 'support'
+
+  // Support Live Chat states
+  const [adminChatOnline, setAdminChatOnline] = useState(false);
+  const [chatSessions, setChatSessions] = useState([]);
+  const [activeAdminChatSession, setActiveAdminChatSession] = useState(null);
+  const [adminChatText, setAdminChatText] = useState("");
+  const [sendingAdminMessage, setSendingAdminMessage] = useState(false);
+
+  // Polling Heartbeat
+  useEffect(() => {
+    if (!adminChatOnline) return;
+
+    const sendHeartbeat = async () => {
+      try {
+        await chatService.sendAdminHeartbeat();
+      } catch (err) {
+        console.error("Heartbeat error:", err);
+      }
+    };
+
+    sendHeartbeat();
+    const interval = setInterval(sendHeartbeat, 4000);
+    return () => clearInterval(interval);
+  }, [adminChatOnline]);
+
+  // Polling Active Chat Sessions List
+  useEffect(() => {
+    if (!adminChatOnline || activeTab !== "support") {
+      setChatSessions([]);
+      return;
+    }
+
+    const loadSessions = async () => {
+      try {
+        const sessions = await chatService.getAdminSessions();
+        setChatSessions(sessions);
+      } catch (err) {
+        console.error("Load chat sessions error:", err);
+      }
+    };
+
+    loadSessions();
+    const interval = setInterval(loadSessions, 2000);
+    return () => clearInterval(interval);
+  }, [adminChatOnline, activeTab]);
+
+  // Polling current open chat details
+  useEffect(() => {
+    if (!activeAdminChatSession) return;
+
+    const loadSessionDetails = async () => {
+      try {
+        const updated = await chatService.getSession(activeAdminChatSession.sessionId);
+        
+        // If the session status changed to closed and we are checking details,
+        // update the state, but don't force clear it unless admin wants to close it.
+        setActiveAdminChatSession(updated);
+      } catch (err) {
+        console.error("Load active chat session details error:", err);
+      }
+    };
+
+    const interval = setInterval(loadSessionDetails, 1500);
+    return () => clearInterval(interval);
+  }, [activeAdminChatSession?.sessionId]);
+
+  const handleJoinChat = async (sessionId) => {
+    try {
+      const updated = await chatService.joinSession(sessionId);
+      setActiveAdminChatSession(updated);
+    } catch (err) {
+      console.error("Failed to join chat session:", err);
+      alert(err.message || "Failed to join chat");
+    }
+  };
+
+  const handleCloseChat = async (sessionId) => {
+    if (!window.confirm("Are you sure you want to end this live chat session?")) return;
+    try {
+      await chatService.closeSession(sessionId);
+      if (activeAdminChatSession && activeAdminChatSession.sessionId === sessionId) {
+        setActiveAdminChatSession(null);
+      }
+      // Refresh session list immediately
+      const sessions = await chatService.getAdminSessions();
+      setChatSessions(sessions);
+    } catch (err) {
+      console.error("Failed to close session:", err);
+      alert(err.message || "Failed to close session");
+    }
+  };
+
+  const handleSendAdminMessage = async (e) => {
+    e.preventDefault();
+    if (!adminChatText.trim() || !activeAdminChatSession || sendingAdminMessage) return;
+
+    const textToSend = adminChatText;
+    setAdminChatText("");
+    setSendingAdminMessage(true);
+
+    try {
+      const updated = await chatService.sendMessage(activeAdminChatSession.sessionId, {
+        sender: "admin",
+        text: textToSend,
+        name: user.name
+      });
+      setActiveAdminChatSession(updated);
+    } catch (err) {
+      console.error("Failed to send admin reply message:", err);
+      alert("Failed to send message.");
+    } finally {
+      setSendingAdminMessage(false);
+    }
+  };
 
   // Admin Data states
   const [productList, setProductList] = useState([]);
@@ -316,7 +431,7 @@ export const Admin = () => {
         <div className="space-y-8 text-left">
           {/* Logo */}
           <div className="flex items-center space-x-2 px-2">
-            <span className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-extrabold text-lg shadow-sm">
+            <span className="w-8 h-8 rounded-lg bg-primary dark:bg-white flex items-center justify-center text-white dark:text-black font-extrabold text-lg shadow-sm">
               Q
             </span>
             <span className="text-xl font-bold tracking-tight text-gradient-primary">
@@ -334,7 +449,7 @@ export const Admin = () => {
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   className={`w-full flex items-center space-x-3.5 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${isActive
-                    ? "bg-primary text-white shadow-md shadow-primary/10"
+                    ? "bg-primary dark:bg-white text-white dark:text-black shadow-md shadow-primary/10 dark:shadow-none"
                     : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/40 hover:text-slate-800 dark:hover:text-white"
                     }`}
                 >
@@ -372,7 +487,7 @@ export const Admin = () => {
         <header className="sticky top-0 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-850 py-4 px-6 sm:px-8 z-30 flex justify-between items-center text-left">
           <div className="md:hidden flex items-center space-x-3">
             {/* Small screen mobile logo */}
-            <span className="w-7 h-7 rounded-md bg-primary flex items-center justify-center text-white font-black text-sm">
+            <span className="w-7 h-7 rounded-md bg-primary dark:bg-white flex items-center justify-center text-white dark:text-black font-black text-sm">
               Q
             </span>
             <span className="text-lg font-bold tracking-tight text-gradient-primary">
@@ -472,15 +587,15 @@ export const Admin = () => {
                       <AreaChart data={SALES_DATA}>
                         <defs>
                           <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#2563EB" stopOpacity={0.2} />
-                            <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
+                            <stop offset="5%" stopColor="var(--chart-stroke-1)" stopOpacity={0.2} />
+                            <stop offset="95%" stopColor="var(--chart-stroke-1)" stopOpacity={0} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                        <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} />
-                        <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" />
+                        <XAxis dataKey="month" stroke="var(--slate-400)" fontSize={11} tickLine={false} />
+                        <YAxis stroke="var(--slate-400)" fontSize={11} tickLine={false} axisLine={false} />
                         <Tooltip />
-                        <Area type="monotone" dataKey="revenue" stroke="#2563EB" strokeWidth={2.5} fillOpacity={1} fill="url(#colorRevenue)" name="Revenue" />
+                        <Area type="monotone" dataKey="revenue" stroke="var(--chart-stroke-1)" strokeWidth={2.5} fillOpacity={1} fill="url(#colorRevenue)" name="Revenue" />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
@@ -492,11 +607,11 @@ export const Admin = () => {
                   <div className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={CATEGORY_DISTRIBUTION}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                        <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} />
-                        <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--chart-grid)" />
+                        <XAxis dataKey="name" stroke="var(--slate-400)" fontSize={10} tickLine={false} />
+                        <YAxis stroke="var(--slate-400)" fontSize={10} tickLine={false} axisLine={false} />
                         <Tooltip />
-                        <Bar dataKey="sales" fill="#0EA5E9" radius={[6, 6, 0, 0]} name="Orders" />
+                        <Bar dataKey="sales" fill="var(--chart-stroke-2)" radius={[6, 6, 0, 0]} name="Orders" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -553,7 +668,7 @@ export const Admin = () => {
                 </div>
                 <button
                   onClick={() => setIsAddModalOpen(true)}
-                  className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-xl text-sm font-bold flex items-center shadow-md shadow-primary/10 hover:shadow-primary/20"
+                  className="px-4 py-2 bg-primary dark:bg-black hover:bg-primary-dark dark:hover:bg-neutral-900/50 text-white dark:text-white dark:border dark:border-white rounded-xl text-sm font-bold flex items-center shadow-md shadow-primary/10 dark:shadow-none hover:shadow-primary/20"
                 >
                   <Plus className="w-4 h-4 mr-1.5" />
                   Add Product
@@ -756,6 +871,198 @@ export const Admin = () => {
           {/* TAB 7: SUPPORT TICKETS & MESSAGES */}
           {activeTab === "support" && (
             <div className="space-y-6 text-left font-sans">
+              
+              {/* LIVE SUPPORT CHAT HEADER & TOGGLE */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-6 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="text-left">
+                  <h4 className="text-lg font-bold text-slate-800 dark:text-white font-sans flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-primary" />
+                    <span>Live Customer Support Chat</span>
+                  </h4>
+                  <p className="text-xs text-slate-450 dark:text-slate-500 mt-1">Accept incoming user chat requests in real-time</p>
+                </div>
+                
+                {/* Online Toggle */}
+                <div className="flex items-center space-x-3">
+                  <span className={`text-xs font-bold font-sans uppercase tracking-wider ${adminChatOnline ? "text-emerald-500" : "text-slate-400"}`}>
+                    {adminChatOnline ? "Agent Online" : "Agent Offline"}
+                  </span>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={adminChatOnline}
+                      onChange={(e) => {
+                        setAdminChatOnline(e.target.checked);
+                        if (!e.target.checked) {
+                          setActiveAdminChatSession(null);
+                        }
+                      }}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-200 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-305 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                  </label>
+                </div>
+              </div>
+
+              {/* LIVE CHAT WORKSPACE (SPLIT SCREEN IF ONLINE) */}
+              {adminChatOnline && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
+                  {/* Left Column: Requests & Active list (Span 1) */}
+                  <div className="lg:col-span-1 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-5 shadow-sm space-y-4">
+                    <h5 className="text-sm font-bold text-slate-800 dark:text-white pb-3 border-b uppercase tracking-wider text-left">
+                      Active Requests ({chatSessions.length})
+                    </h5>
+
+                    {chatSessions.length === 0 ? (
+                      <div className="text-center py-10 text-xs font-semibold text-slate-450 bg-slate-50 dark:bg-slate-950/20 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                        No active chat sessions
+                      </div>
+                    ) : (
+                      <div className="space-y-2.5 overflow-y-auto max-h-[380px]">
+                        {chatSessions.map((ses) => {
+                          const isActive = activeAdminChatSession?.sessionId === ses.sessionId;
+                          const isWaiting = ses.status === "waiting";
+                          return (
+                            <div
+                              key={ses.sessionId}
+                              onClick={() => handleJoinChat(ses.sessionId)}
+                              className={`p-3.5 rounded-2xl border transition-all cursor-pointer text-left ${
+                                isActive
+                                  ? "border-primary bg-primary/5 dark:bg-primary/10"
+                                  : "border-slate-150 dark:border-slate-800/80 hover:border-slate-350"
+                              }`}
+                            >
+                              <div className="flex justify-between items-start gap-2">
+                                <h6 className="font-bold text-sm text-slate-800 dark:text-white truncate flex-grow">
+                                  {ses.user.name}
+                                </h6>
+                                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                                  isWaiting ? "bg-amber-500/10 text-amber-500 animate-pulse" : "bg-emerald-500/10 text-emerald-500"
+                                }`}>
+                                  {isWaiting ? "Queue" : "Active"}
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-400 truncate mt-0.5">{ses.user.email}</p>
+                              
+                              <div className="flex justify-between items-center mt-3 pt-2 border-t border-slate-100/50 dark:border-slate-800/40">
+                                <span className="text-[9px] font-semibold text-slate-450">
+                                  Active: {new Date(ses.lastActive).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCloseChat(ses.sessionId);
+                                  }}
+                                  className="text-[10px] font-bold text-red-500 hover:underline"
+                                >
+                                  Close
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right Column: Active Conversation (Span 2) */}
+                  <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 rounded-3xl overflow-hidden shadow-sm flex flex-col justify-between h-[450px]">
+                    {activeAdminChatSession ? (
+                      <div className="flex flex-col h-full">
+                        {/* Conversation Header */}
+                        <div className="p-4 border-b bg-slate-50 dark:bg-slate-950/20 flex items-center justify-between text-left">
+                          <div>
+                            <h5 className="font-bold text-sm text-slate-805 dark:text-white">
+                              Chatting with: {activeAdminChatSession.user.name}
+                            </h5>
+                            <p className="text-[10px] text-slate-400">{activeAdminChatSession.user.email}</p>
+                          </div>
+                          <button
+                            onClick={() => handleCloseChat(activeAdminChatSession.sessionId)}
+                            className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-650 text-xs font-bold rounded-xl border border-red-200/20 transition-all"
+                          >
+                            End Chat
+                          </button>
+                        </div>
+
+                        {/* Messages Box */}
+                        <div className="flex-grow p-4 overflow-y-auto space-y-3.5 Scrollbar-thin text-left bg-slate-50/50 dark:bg-slate-950/10">
+                          {activeAdminChatSession.messages.map((m, idx) => {
+                            const isSystem = m.name === "System";
+                            const isMe = m.sender === "admin";
+                            
+                            if (isSystem) {
+                              return (
+                                <div key={idx} className="text-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest my-1">
+                                  — {m.text} —
+                                </div>
+                              );
+                            }
+
+                            return (
+                              <div
+                                key={idx}
+                                className={`flex items-start gap-2.5 max-w-[85%] ${
+                                  isMe ? "ml-auto flex-row-reverse" : "mr-auto"
+                                }`}
+                              >
+                                <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${
+                                  isMe ? "bg-emerald-500 text-white" : "bg-primary text-white"
+                                }`}>
+                                  {isMe ? "AD" : "US"}
+                                </div>
+                                <div className={`p-3 rounded-2xl text-sm ${
+                                  isMe ? "bg-emerald-500 text-white" : "bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-850 text-slate-700 dark:text-slate-300"
+                                }`}>
+                                  <p className="whitespace-pre-line leading-relaxed">{m.text}</p>
+                                  <span className={`block text-[9px] mt-1 text-right ${isMe ? "text-white/60" : "text-slate-400"}`}>
+                                    {new Date(m.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Input Footer */}
+                        <form
+                          onSubmit={handleSendAdminMessage}
+                          className="p-3 border-t bg-white dark:bg-slate-900 flex items-center gap-2"
+                        >
+                          <input
+                            type="text"
+                            value={adminChatText}
+                            onChange={(e) => setAdminChatText(e.target.value)}
+                            placeholder="Type message response to customer..."
+                            className="flex-grow px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-205 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-sans rounded-xl text-xs"
+                            required
+                          />
+                          <button
+                            type="submit"
+                            disabled={!adminChatText.trim() || sendingAdminMessage}
+                            className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-md font-bold text-xs transition-all flex items-center space-x-1 disabled:opacity-50"
+                          >
+                            <span>Send</span>
+                          </button>
+                        </form>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full p-6 text-center text-slate-400">
+                        <MessageSquare className="w-12 h-12 text-slate-305 mb-2.5 animate-bounce" />
+                        <p className="text-sm font-semibold">Select a chat request from the left list to begin replying.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* TICKET DIVIDER */}
+              <div className="border-t border-slate-200/50 dark:border-slate-850 pt-6 mt-8">
+                <h3 className="text-lg font-bold text-slate-800 dark:text-white font-sans mb-1">Traditional Support Tickets</h3>
+                <p className="text-xs text-slate-400">Manage support tickets submitted via contact form</p>
+              </div>
+
               <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 pb-4 border-b border-slate-200/50 dark:border-slate-850">
                 <div>
                   <h3 className="text-xl font-bold text-slate-805 dark:text-white font-sans">Support Tickets</h3>

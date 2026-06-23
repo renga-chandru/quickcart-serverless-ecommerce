@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ChevronLeft, ChevronRight, Star, ShoppingBag, ShieldCheck, Zap, Heart } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Star, ShoppingBag, ShieldCheck, Zap, Heart, Sparkles } from "lucide-react";
 import productService from "../../services/productService";
 import CategoryCard from "../../components/CategoryCard/CategoryCard";
 import ProductCard from "../../components/ProductCard/ProductCard";
+import RecommendationCard from "../../components/RecommendationCard/RecommendationCard";
+import RecommendationEngine from "../../services/RecommendationEngine";
 import Modal from "../../components/Modal/Modal";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
@@ -12,13 +14,14 @@ import { WHY_CHOOSE_US, TESTIMONIALS } from "../../constants/data";
 
 export const Home = () => {
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
-  // State
   const [categories, setCategories] = useState([]);
   const [trendingProducts, setTrendingProducts] = useState([]);
   const [dealProducts, setDealProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   
   // Testimonials Slider State
@@ -54,14 +57,16 @@ export const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [cats, trending, deals] = await Promise.all([
+        const [cats, trending, deals, allProdsResult] = await Promise.all([
           productService.getCategories(),
           productService.getTrendingProducts(),
           productService.getDeals(),
+          productService.getProducts({ limit: 100 })
         ]);
         setCategories(cats);
         setTrendingProducts(trending.slice(0, 4));
         setDealProducts(deals.slice(0, 4));
+        setAllProducts(allProdsResult.products || []);
       } catch (err) {
         console.error("Error fetching home data:", err);
       } finally {
@@ -70,6 +75,14 @@ export const Home = () => {
     };
     fetchData();
   }, []);
+
+  // Compute recommendations dynamically
+  useEffect(() => {
+    if (allProducts.length > 0) {
+      const recs = RecommendationEngine.getRecommendations(allProducts, null, cartItems || []);
+      setRecommendedProducts(recs);
+    }
+  }, [allProducts, cartItems]);
 
   // Slider controls
   const prevTestimonial = () => {
@@ -142,7 +155,7 @@ export const Home = () => {
             <div className="flex flex-wrap gap-4 pt-4">
               <Link
                 to="/products"
-                className="px-8 py-3.5 bg-primary hover:bg-primary-dark text-white rounded-2xl font-bold shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center space-x-2"
+                className="px-8 py-3.5 bg-primary dark:bg-black hover:bg-primary-dark dark:hover:bg-neutral-900/50 text-white dark:text-white dark:border dark:border-white rounded-2xl font-bold shadow-lg shadow-primary/20 dark:shadow-none hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 flex items-center space-x-2"
               >
                 <span>Shop Now</span>
                 <ArrowRight className="w-5 h-5" />
@@ -316,6 +329,35 @@ export const Home = () => {
         )}
       </section>
 
+      {/* AI RECOMMENDATIONS SECTION */}
+      {!loading && recommendedProducts.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-left animate-in fade-in duration-300">
+          <div className="text-left space-y-2">
+            <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-500 dark:bg-indigo-950/30 dark:text-indigo-400 font-sans text-xs font-bold uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 fill-current animate-pulse" />
+              <span>Personalized for You</span>
+            </div>
+            <h2 className="text-3xl font-extrabold font-sans text-slate-900 dark:text-white tracking-tight">
+              Recommended for You
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
+              Smart picks based on your activity, viewed items, and cart choices.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {recommendedProducts.map((rec) => (
+              <RecommendationCard
+                key={rec.product.id}
+                product={rec.product}
+                matchPercentage={rec.matchPercentage}
+                onQuickView={handleQuickView}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* 5. WHY CHOOSE QUICKCART */}
       <section className="bg-slate-50 dark:bg-slate-900/40 py-16 border-y border-slate-200/40 dark:border-slate-800/40 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -463,7 +505,7 @@ export const Home = () => {
             />
             <button
               type="submit"
-              className="px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-2xl font-bold shadow-md shadow-primary/10 hover:shadow-primary/20 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
+              className="px-6 py-3 bg-primary dark:bg-black hover:bg-primary-dark dark:hover:bg-neutral-900/50 text-white dark:text-white dark:border dark:border-white rounded-2xl font-bold shadow-md shadow-primary/10 dark:shadow-none hover:shadow-primary/20 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300"
             >
               Subscribe
             </button>
@@ -545,7 +587,7 @@ export const Home = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={handleQuickAddToCart}
-                    className="w-full py-3 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold shadow-md shadow-primary/10 hover:shadow-primary/20 transition-all duration-300"
+                    className="w-full py-3 bg-primary dark:bg-black hover:bg-primary-dark dark:hover:bg-neutral-900/50 text-white dark:text-white dark:border dark:border-white rounded-xl font-bold shadow-md shadow-primary/10 dark:shadow-none hover:shadow-primary/20 transition-all duration-300"
                   >
                     Add to Cart
                   </button>

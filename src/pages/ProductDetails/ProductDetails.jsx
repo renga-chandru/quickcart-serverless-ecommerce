@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Star, Heart, ShoppingCart, Share2, Shield, Truck, RefreshCw, ChevronRight, Check } from "lucide-react";
+import { Star, Heart, ShoppingCart, Share2, Shield, Truck, RefreshCw, ChevronRight, Check, Sparkles } from "lucide-react";
 import productService from "../../services/productService";
 import ProductCard from "../../components/ProductCard/ProductCard";
+import RecommendationCard from "../../components/RecommendationCard/RecommendationCard";
+import RecommendationEngine from "../../services/RecommendationEngine";
 import { SkeletonDetails } from "../../components/Loading/Loading";
 import { useCart } from "../../context/CartContext";
 import { useWishlist } from "../../context/WishlistContext";
@@ -10,12 +12,13 @@ import { useWishlist } from "../../context/WishlistContext";
 export const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
   // Component States
   const [product, setProduct] = useState(null);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeImage, setActiveImage] = useState("");
@@ -31,17 +34,26 @@ export const ProductDetails = () => {
       setLoading(true);
       setError("");
       try {
-        const prod = await productService.getProductById(id);
+        const [prod, allProductsResult] = await Promise.all([
+          productService.getProductById(id),
+          productService.getProducts({ limit: 100 })
+        ]);
+        
         setProduct(prod);
         setActiveImage(prod.images?.[0] || prod.image);
         
+        // Track the view in local storage history
+        RecommendationEngine.trackProductView(prod.id);
+
         // Fetch related products (same category, excluding current product)
-        const allProductsResult = await productService.getProducts({
-          category: prod.category,
-          limit: 10,
-        });
-        const related = allProductsResult.products.filter((p) => p.id !== prod.id).slice(0, 4);
+        const related = allProductsResult.products
+          .filter((p) => p.category === prod.category && p.id !== prod.id)
+          .slice(0, 4);
         setRelatedProducts(related);
+
+        // Compute AI Recommendations
+        const recs = RecommendationEngine.getRecommendations(allProductsResult.products, prod, cartItems || []);
+        setRecommendedProducts(recs);
       } catch (err) {
         console.error("Error loading product details:", err);
         setError("Failed to load product. It may not exist.");
@@ -51,7 +63,7 @@ export const ProductDetails = () => {
     };
     
     fetchProductDetails();
-  }, [id]);
+  }, [id, cartItems]);
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -82,7 +94,7 @@ export const ProductDetails = () => {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
         <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-4">{error || "Product not found"}</h3>
-        <Link to="/products" className="px-6 py-3 bg-primary text-white rounded-xl font-bold">
+        <Link to="/products" className="px-6 py-3 bg-primary dark:bg-black hover:bg-primary-dark dark:hover:bg-neutral-900/50 text-white dark:text-white dark:border dark:border-white rounded-xl font-bold">
           Back to Catalogue
         </Link>
       </div>
@@ -269,8 +281,8 @@ export const ProductDetails = () => {
                   disabled={outOfStock}
                   className={`flex-grow h-12 rounded-2xl font-bold flex items-center justify-center space-x-2.5 transition-all shadow-md ${
                     outOfStock
-                      ? "bg-slate-100 dark:bg-slate-800 text-slate-405 dark:text-slate-600 cursor-not-allowed"
-                      : "bg-primary hover:bg-primary-dark text-white shadow-primary/10 hover:shadow-primary/20 hover:-translate-y-0.5"
+                      ? "bg-slate-105 dark:bg-slate-800 text-slate-405 dark:text-slate-600 cursor-not-allowed"
+                      : "bg-primary dark:bg-black hover:bg-primary-dark dark:hover:bg-neutral-900/50 text-white dark:text-white dark:border dark:border-white shadow-primary/10 dark:shadow-none hover:shadow-primary/20 hover:-translate-y-0.5"
                   }`}
                 >
                   <ShoppingCart className="w-5 h-5" />
@@ -390,6 +402,31 @@ export const ProductDetails = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {relatedProducts.map((p) => (
               <ProductCard key={p.id} product={p} onQuickView={() => navigate(`/products/${p.id}`)} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recommended Products */}
+      {recommendedProducts.length > 0 && (
+        <div className="mt-20 space-y-8 text-left border-t border-slate-200/40 dark:border-slate-850 pt-12">
+          <div className="flex items-center space-x-2">
+            <h2 className="text-2xl font-extrabold font-sans text-slate-900 dark:text-white">
+              Recommended for You
+            </h2>
+            <span className="bg-gradient-to-r from-primary to-indigo-650 text-white font-sans text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center space-x-1 uppercase tracking-wider">
+              <Sparkles className="w-3 h-3 fill-current animate-pulse" />
+              <span>AI Choice</span>
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {recommendedProducts.map((rec) => (
+              <RecommendationCard
+                key={rec.product.id}
+                product={rec.product}
+                matchPercentage={rec.matchPercentage}
+                onQuickView={(p) => navigate(`/products/${p.id}`)}
+              />
             ))}
           </div>
         </div>

@@ -11,6 +11,7 @@ import cartRoutes from "./routes/cartRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import ticketRoutes from "./routes/ticketRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
 
 // Middlewares
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
@@ -37,6 +38,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/tickets", ticketRoutes);
+app.use("/api/chat", chatRoutes);
 
 // Root Endpoint
 app.get("/", (req, res) => {

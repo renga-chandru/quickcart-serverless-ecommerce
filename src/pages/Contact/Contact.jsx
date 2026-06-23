@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Mail, Phone, MapPin, Send, Check } from "lucide-react";
+import { Mail, Phone, MapPin, Send, Check, MessageSquare } from "lucide-react";
 import Button from "../../components/Button/Button";
 import Input from "../../components/Input/Input";
 import { useAuth } from "../../context/AuthContext";
 import ticketService from "../../services/ticketService";
+import chatService from "../../services/chatService";
+import Modal from "../../components/Modal/Modal";
+import FAQBot from "../../components/FAQBot/FAQBot";
+import ChatWindow from "../../components/ChatWindow/ChatWindow";
 
 export const Contact = () => {
   const { user } = useAuth();
@@ -18,6 +22,11 @@ export const Contact = () => {
   const [submitError, setSubmitError] = useState("");
   const [createdTicketId, setCreatedTicketId] = useState("");
 
+  // Chat States
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [adminOnline, setAdminOnline] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(false);
+
   // Auto-fill logged in user info
   useEffect(() => {
     if (user) {
@@ -25,6 +34,26 @@ export const Contact = () => {
       setEmail(user.email || "");
     }
   }, [user]);
+
+  const handleLiveSupportClick = async () => {
+    if (!name.trim() || !email.trim()) {
+      setSubmitError("Please enter your name and email address to start Live Support.");
+      return;
+    }
+
+    setSubmitError("");
+    setCheckingStatus(true);
+    try {
+      const online = await chatService.checkAdminOnline();
+      setAdminOnline(online);
+      setIsChatModalOpen(true);
+    } catch (err) {
+      console.error("Live status check error:", err);
+      setSubmitError("Unable to connect to live support server. Please try again.");
+    } finally {
+      setCheckingStatus(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -147,6 +176,7 @@ export const Contact = () => {
                     Inquiry Category
                   </label>
                   <select
+                    id="inquiry-category-select"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-sans"
@@ -190,17 +220,31 @@ export const Contact = () => {
                   Message Details <span className="text-red-500">*</span>
                 </label>
                 <textarea
+                  id="message-details-textarea"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Type details of your inquiry..."
                   rows="5"
-                  className="w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-sans disabled:opacity-60 disabled:bg-slate-50 dark:disabled:bg-slate-900/50"
+                  className="w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-905 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-sans disabled:opacity-60 disabled:bg-slate-50 dark:disabled:bg-slate-900/50"
                   required
                   disabled={submitting}
                 />
               </div>
 
-              <div className="flex justify-end pt-2">
+              <div className="flex flex-col sm:flex-row justify-end items-stretch sm:items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleLiveSupportClick}
+                  disabled={checkingStatus}
+                  className={`px-6 py-2.5 font-bold rounded-xl text-sm transition-all flex items-center justify-center space-x-2 border shadow-sm ${
+                    checkingStatus
+                      ? "bg-slate-100 dark:bg-slate-800 text-slate-450 dark:text-slate-500 border-slate-200/50 dark:border-slate-800 cursor-not-allowed"
+                      : "bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border-slate-200/50 dark:border-slate-800 hover:-translate-y-0.5"
+                  }`}
+                >
+                  <MessageSquare className="w-4 h-4 text-primary" />
+                  <span>{checkingStatus ? "Checking Status..." : "Live Support"}</span>
+                </button>
                 <Button
                   type="submit"
                   icon={Send}
@@ -215,6 +259,42 @@ export const Contact = () => {
         </div>
 
       </div>
+
+      {/* Support Chat Modal (Loaded inline inside support page) */}
+      <Modal
+        isOpen={isChatModalOpen}
+        onClose={() => setIsChatModalOpen(false)}
+        title={adminOnline ? "Live Support Chat" : "Automated Help Bot"}
+        size="md"
+      >
+        {adminOnline ? (
+          <ChatWindow
+            name={name}
+            email={email}
+            userId={user?.id || user?._id || null}
+          />
+        ) : (
+          <FAQBot
+            onEscalate={() => {
+              setIsChatModalOpen(false);
+              // Smoothly focus on Category input
+              setTimeout(() => {
+                const categoryEl = document.getElementById("inquiry-category-select");
+                const messageEl = document.getElementById("message-details-textarea");
+                
+                if (categoryEl) {
+                  categoryEl.focus();
+                  categoryEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+                
+                if (messageEl) {
+                  messageEl.placeholder = "Please type details of your inquiry here to submit a support ticket...";
+                }
+              }, 300);
+            }}
+          />
+        )}
+      </Modal>
     </div>
   );
 };
