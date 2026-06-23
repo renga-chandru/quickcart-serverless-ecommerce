@@ -2,6 +2,117 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-primary: 37 99 235; /* #2563EB */
+  --color-primary-dark: 29 78 216; /* #1D4ED8 */
+  --color-primary-light: 59 130 246; /* #3B82F6 */
+  --color-secondary: 14 165 233; /* #0EA5E9 */
+  --color-secondary-dark: 2 132 199; /* #0284C7 */
+  --color-secondary-light: 56 189 248; /* #38BDF8 */
+  --color-accent: 20 184 166; /* #14B8A6 */
+  --color-accent-dark: 15 118 110; /* #0F766E */
+  --color-accent-light: 45 212 191; /* #2DD4BF */
+  
+  --color-bg-dark: 15 23 42; /* #0F172A */
+  --color-card-dark: 30 41 59; /* #1E293B */
+
+  /* Original Tailwind Slate colors (in r g b format) */
+  --slate-50: 248 250 252;
+  --slate-100: 241 245 249;
+  --slate-200: 226 232 240;
+  --slate-300: 203 213 225;
+  --slate-400: 148 163 184;
+  --slate-450: 100 116 139;
+  --slate-455: 100 116 139;
+  --slate-500: 100 116 139;
+  --slate-550: 71 85 105;
+  --slate-600: 71 85 105;
+  --slate-650: 71 85 105;
+  --slate-655: 71 85 105;
+  --slate-700: 51 65 85;
+  --slate-755: 30 41 59;
+  --slate-800: 30 41 59;
+  --slate-805: 15 23 42;
+  --slate-850: 15 23 42;
+  --slate-900: 15 23 42;
+  --slate-950: 2 6 23;
+  
+  /* Chart colors */
+  --chart-stroke-1: #2563EB;
+  --chart-stroke-2: #0EA5E9;
+  --chart-grid: #f1f5f9;
+}
+
+.dark {
+  /* Main Background */
+  --color-bg-dark: 0 0 0; /* #000000 */
+  --slate-950: 0 0 0;
+  
+  /* Secondary Background */
+  --slate-900: 17 17 17; /* #111111 */
+  
+  /* Cards / Panels */
+  --color-card-dark: 23 23 23; /* #171717 */
+  --slate-850: 23 23 23;
+  
+  /* Borders */
+  --slate-800: 42 42 42; /* #2A2A2A */
+  --slate-805: 42 42 42;
+  
+  /* Primary Text */
+  --slate-100: 255 255 255;
+  --slate-200: 255 255 255;
+  
+  /* Secondary Text */
+  --slate-300: 161 161 161; /* #A1A1A1 */
+  --slate-350: 161 161 161;
+  --slate-400: 161 161 161;
+  --slate-450: 161 161 161;
+  --slate-455: 161 161 161;
+  --slate-500: 161 161 161;
+  --slate-550: 161 161 161;
+  --slate-600: 161 161 161;
+  --slate-650: 161 161 161;
+  --slate-655: 161 161 161;
+  --slate-700: 161 161 161;
+  --slate-755: 161 161 161;
+
+  /* Primary/secondary/accent in dark mode (Monochrome white/gray/silver) */
+  --color-primary: 255 255 255;
+  --color-primary-dark: 229 229 229;
+  --color-primary-light: 255 255 255;
+  
+  --color-secondary: 161 161 161;
+  --color-secondary-dark: 115 115 115;
+  --color-secondary-light: 255 255 255;
+  
+  --color-accent: 229 229 229;
+  --color-accent-dark: 161 161 161;
+  --color-accent-light: 255 255 255;
+
+  /* Chart Colors */
+  --chart-stroke-1: #FFFFFF;
+  --chart-stroke-2: #A1A1A1;
+  --chart-grid: #2A2A2A;
+}
+
+/* Global utility overrides for hover and visual polish in dark mode */
+.dark .dark\:hover\:bg-slate-800:hover,
+.dark .dark\:hover\:bg-slate-800\/50:hover,
+.dark .hover\:bg-slate-100:hover,
+.dark .dark\:hover\:bg-slate-700:hover {
+  background-color: #222222 !important;
+}
+
+/* Scrollbar styles for dark mode */
+.dark ::-webkit-scrollbar-thumb {
+  background: #2A2A2A !important;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #404040 !important;
+}
+
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -52,7 +163,7 @@
   }
   
   .btn-gradient {
-    @apply bg-gradient-to-r from-primary to-secondary text-white font-medium shadow-lg hover:shadow-primary/20 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 hover:brightness-105;
+    @apply bg-gradient-to-r from-primary to-secondary text-white dark:from-black dark:to-black dark:text-white dark:border dark:border-white font-medium shadow-lg hover:shadow-primary/20 dark:hover:shadow-none transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 hover:brightness-105;
   }
 
   .btn-outline {

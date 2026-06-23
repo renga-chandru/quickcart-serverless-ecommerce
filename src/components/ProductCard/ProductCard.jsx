@@ -132,7 +132,7 @@ export const ProductCard = ({ product, onQuickView }) => {
             className={`p-2.5 rounded-xl transition-all duration-300 ${
               outOfStock
                 ? "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed"
-                : "bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/10 hover:shadow-primary/20 hover:scale-105 active:scale-95"
+                : "bg-primary dark:bg-black text-white dark:text-white dark:border dark:border-white hover:bg-primary-dark dark:hover:bg-neutral-900/50 shadow-md shadow-primary/10 dark:shadow-none hover:shadow-primary/20 hover:scale-105 active:scale-95"
             }`}
             title={outOfStock ? "Out of stock" : "Add to cart"}
           >

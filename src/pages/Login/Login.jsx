@@ -42,14 +42,14 @@ export const Login = () => {
 
     try {
       await login(email, password);
-      
+
       // Save email if remember checked
       if (rememberMe) {
         localStorage.setItem("quickcart_remembered_email", email);
       } else {
         localStorage.removeItem("quickcart_remembered_email");
       }
-      
+
       // Redirect based on role
       const userJSON = localStorage.getItem("quickcart_user");
       if (userJSON) {
@@ -81,17 +81,17 @@ export const Login = () => {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors">
-      
+
       {/* Background glowing decorations */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[400px] h-[400px] rounded-full bg-primary/5 blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-72 h-72 rounded-full bg-secondary/5 blur-3xl pointer-events-none" />
 
       <div className="w-full max-w-md space-y-8 relative z-10">
-        
+
         {/* Header */}
         <div className="text-center space-y-2">
           <Link to="/" className="inline-flex items-center space-x-2">
-            <span className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-sans font-extrabold text-lg shadow-sm">
+            <span className="w-8 h-8 rounded-lg bg-primary dark:bg-white flex items-center justify-center text-white dark:text-black font-sans font-extrabold text-lg shadow-sm">
               Q
             </span>
             <span className="text-xl font-bold font-sans tracking-tight text-gradient-primary">
@@ -108,7 +108,7 @@ export const Login = () => {
 
         {/* Glassmorphic Form Card */}
         <div className="glass-card p-8 rounded-3xl shadow-xl border border-white/20 dark:border-slate-800/40 text-left space-y-6">
-          
+
           {error && (
             <div className="bg-red-500/10 text-red-500 p-4 rounded-xl border border-red-500/20 text-xs font-semibold flex items-center space-x-2">
               <ShieldAlert className="w-4 h-4 flex-shrink-0" />
@@ -125,7 +125,7 @@ export const Login = () => {
               placeholder="e.g. user@quickcart.com"
               required
             />
-            
+
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300 font-sans">
@@ -173,7 +173,7 @@ export const Login = () => {
               <span className="bg-white dark:bg-slate-900 px-3.5 relative z-10">Or continue with</span>
               <div className="absolute top-1/2 inset-x-0 h-px bg-slate-100 dark:bg-slate-850" />
             </div>
-            
+
             <div className="grid grid-cols-3 gap-3">
               <button className="flex items-center justify-center py-2.5 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-xl text-slate-600 dark:text-slate-300 transition-colors shadow-sm">
                 <ChromeIcon className="w-4 h-4" />

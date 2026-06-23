@@ -184,7 +184,7 @@ export const Orders = () => {
                       {/* Node circle */}
                       <div className={`absolute -left-6.5 p-1 rounded-full border-2 transition-all ${
                         isCompleted
-                          ? "bg-primary border-primary text-white"
+                          ? "bg-primary dark:bg-white border-primary dark:border-white text-white dark:text-black"
                           : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-300"
                       }`}>
                         <StepIcon className="w-3.5 h-3.5" />

@@ -90,7 +90,7 @@ export const FAQBot = ({ onEscalate }) => {
                 className={`w-7.5 h-7.5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${
                   isBot
                     ? "bg-slate-200 dark:bg-slate-850 text-slate-600 dark:text-slate-400"
-                    : "bg-primary text-white"
+                    : "bg-primary text-white dark:bg-white dark:text-slate-950"
                 }`}
               >
                 {isBot ? "QB" : <User className="w-4 h-4" />}
@@ -99,11 +99,11 @@ export const FAQBot = ({ onEscalate }) => {
                 className={`p-3.5 rounded-2xl text-sm leading-relaxed ${
                   isBot
                     ? "bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-850 text-slate-700 dark:text-slate-300"
-                    : "bg-primary text-white"
+                    : "bg-primary text-white dark:bg-white dark:text-slate-950"
                 }`}
               >
                 <p className="whitespace-pre-line">{m.text}</p>
-                <span className={`block text-[9px] mt-1 text-right ${isBot ? "text-slate-400" : "text-white/60"}`}>
+                <span className={`block text-[9px] mt-1 text-right ${isBot ? "text-slate-400" : "text-white/60 dark:text-slate-950/60"}`}>
                   {new Date(m.timestamp).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
                 </span>
               </div>

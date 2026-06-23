@@ -43,7 +43,7 @@ export const Filters = ({
             onClick={() => setSelectedCategory("all")}
             className={`px-3 py-1.5 rounded-xl text-sm text-left transition-all duration-300 font-medium ${
               selectedCategory === "all"
-                ? "bg-primary text-white"
+                ? "bg-primary dark:bg-white text-white dark:text-black"
                 : "text-slate-650 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800/50"
             }`}
           >
@@ -55,7 +55,7 @@ export const Filters = ({
               onClick={() => setSelectedCategory(cat.name)}
               className={`px-3 py-1.5 rounded-xl text-sm text-left transition-all duration-300 font-medium ${
                 selectedCategory.toLowerCase() === cat.name.toLowerCase()
-                  ? "bg-primary text-white"
+                  ? "bg-primary dark:bg-white text-white dark:text-black"
                   : "text-slate-650 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800/50"
               }`}
             >
@@ -97,14 +97,14 @@ export const Filters = ({
               onClick={() => setSelectedRating(val)}
               className={`flex items-center text-sm px-3 py-1.5 rounded-xl transition-all duration-300 font-medium text-left ${
                 selectedRating === val
-                  ? "bg-primary text-white"
+                  ? "bg-primary dark:bg-white text-white dark:text-black"
                   : "text-slate-650 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800/50"
               }`}
             >
               <div className="flex items-center text-amber-450 mr-1.5">
-                <Star className={`w-4 h-4 fill-current ${selectedRating === val ? "text-white" : "text-amber-450"}`} />
+                <Star className={`w-4 h-4 fill-current ${selectedRating === val ? "text-white dark:text-black" : "text-amber-450"}`} />
               </div>
-              <span className={selectedRating === val ? "text-white" : "text-slate-700 dark:text-slate-300"}>
+              <span className={selectedRating === val ? "text-white dark:text-black" : "text-slate-700 dark:text-slate-300"}>
                 {val} Stars & Up
               </span>
             </button>

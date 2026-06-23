@@ -234,7 +234,7 @@ export const Cart = () => {
             <div className="pt-2">
               <button
                 onClick={() => navigate("/checkout")}
-                className="w-full py-3 bg-primary hover:bg-primary-dark text-white font-bold rounded-2xl shadow-lg shadow-primary/10 hover:shadow-primary/20 transition-all flex items-center justify-center space-x-2"
+                className="w-full py-3 bg-primary dark:bg-black hover:bg-primary-dark dark:hover:bg-neutral-900/50 text-white dark:text-white dark:border dark:border-white font-bold rounded-2xl shadow-lg shadow-primary/10 dark:shadow-none hover:shadow-primary/20 transition-all flex items-center justify-center space-x-2"
               >
                 <span>Proceed to Checkout</span>
                 <ArrowRight className="w-4.5 h-4.5" />

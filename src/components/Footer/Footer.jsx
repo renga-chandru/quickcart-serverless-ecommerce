@@ -24,7 +24,7 @@ export const Footer = () => {
         {/* Col 1: Brand & Desc */}
         <div className="lg:col-span-2 space-y-4">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-sans font-extrabold text-lg shadow-sm">
+            <span className="w-8 h-8 rounded-lg bg-primary dark:bg-white flex items-center justify-center text-white dark:text-black font-sans font-extrabold text-lg shadow-sm">
               Q
             </span>
             <span className="text-xl font-bold font-sans tracking-tight text-gradient-primary">
@@ -122,7 +122,7 @@ export const Footer = () => {
             <button
               type="submit"
               disabled={subscribed}
-              className="absolute right-1 p-1.5 rounded-lg bg-primary hover:bg-primary-dark text-white transition-colors disabled:bg-emerald-500"
+              className="absolute right-1 p-1.5 rounded-lg bg-primary dark:bg-white hover:bg-primary-dark dark:hover:bg-neutral-200 text-white dark:text-black transition-colors disabled:bg-emerald-500"
             >
               <Send className="w-3 h-3" />
             </button>

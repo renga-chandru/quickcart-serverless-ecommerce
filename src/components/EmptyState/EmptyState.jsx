@@ -27,14 +27,14 @@ export const EmptyState = ({
       {onActionClick ? (
         <button
           onClick={onActionClick}
-          className="px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-xl font-medium transition-all duration-300 transform hover:-translate-y-0.5"
+          className="px-6 py-3 bg-primary dark:bg-black hover:bg-primary-dark dark:hover:bg-neutral-900/50 text-white dark:text-white dark:border dark:border-white rounded-xl font-medium transition-all duration-300 transform hover:-translate-y-0.5"
         >
           {actionText}
         </button>
       ) : (
         <Link
           to={actionLink}
-          className="px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-xl font-medium transition-all duration-300 transform hover:-translate-y-0.5 block text-center"
+          className="px-6 py-3 bg-primary dark:bg-black hover:bg-primary-dark dark:hover:bg-neutral-900/50 text-white dark:text-white dark:border dark:border-white rounded-xl font-medium transition-all duration-300 transform hover:-translate-y-0.5 block text-center"
         >
           {actionText}
         </Link>

@@ -125,7 +125,7 @@ export const Signup = () => {
         {/* Header */}
         <div className="text-center space-y-2">
           <Link to="/" className="inline-flex items-center space-x-2">
-            <span className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-sans font-extrabold text-lg shadow-sm">
+            <span className="w-8 h-8 rounded-lg bg-primary dark:bg-white flex items-center justify-center text-white dark:text-black font-sans font-extrabold text-lg shadow-sm">
               Q
             </span>
             <span className="text-xl font-bold font-sans tracking-tight text-gradient-primary">

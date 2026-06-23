@@ -127,7 +127,7 @@ export const Products = () => {
               onClick={() => setIsGridView(true)}
               className={`p-1.5 rounded-lg transition-colors ${
                 isGridView
-                  ? "bg-primary text-white"
+                  ? "bg-primary dark:bg-white text-white dark:text-black"
                   : "text-slate-500 hover:text-slate-800 dark:hover:text-white"
               }`}
             >
@@ -137,7 +137,7 @@ export const Products = () => {
               onClick={() => setIsGridView(false)}
               className={`p-1.5 rounded-lg transition-colors ${
                 !isGridView
-                  ? "bg-primary text-white"
+                  ? "bg-primary dark:bg-white text-white dark:text-black"
                   : "text-slate-500 hover:text-slate-800 dark:hover:text-white"
               }`}
             >
@@ -320,7 +320,7 @@ export const Products = () => {
                             className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
                               outOfStock
                                 ? "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
-                                : "bg-primary text-white hover:bg-primary-dark shadow-md shadow-primary/10"
+                                : "bg-primary dark:bg-black text-white dark:text-white dark:border dark:border-white hover:bg-primary-dark dark:hover:bg-neutral-900/50 shadow-md shadow-primary/10 dark:shadow-none"
                             }`}
                           >
                             Add to Cart
@@ -502,10 +502,10 @@ export const Products = () => {
                     onClick={handleQuickAddToCart}
                     disabled={quickViewProduct.stock <= 0}
                     className={`w-full py-3 rounded-xl font-bold shadow-md transition-all duration-300 ${
-                      quickViewProduct.stock <= 0
-                        ? "bg-slate-100 dark:bg-slate-800 text-slate-405 dark:text-slate-600 cursor-not-allowed"
-                        : "bg-primary hover:bg-primary-dark text-white shadow-primary/10 hover:shadow-primary/20"
-                    }`}
+                        quickViewProduct.stock <= 0
+                          ? "bg-slate-100 dark:bg-slate-800 text-slate-405 dark:text-slate-600 cursor-not-allowed"
+                          : "bg-primary dark:bg-black text-white dark:text-white dark:border dark:border-white hover:bg-primary-dark dark:hover:bg-neutral-900/50 shadow-primary/10 dark:shadow-none hover:shadow-primary/20"
+                      }`}
                   >
                     Add to Cart
                   </button>

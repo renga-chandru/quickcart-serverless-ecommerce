@@ -194,7 +194,7 @@ export const Profile = () => {
                   onClick={() => setActiveTab(item.id)}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-350 ${
                     isActive
-                      ? "bg-primary text-white shadow-md shadow-primary/10"
+                      ? "bg-primary dark:bg-white text-white dark:text-black shadow-md shadow-primary/10 dark:shadow-none"
                       : "text-slate-650 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/40"
                   }`}
                 >
@@ -204,7 +204,7 @@ export const Profile = () => {
                   </div>
                   {item.id === "tickets" && unreadSupportCount > 0 && (
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      isActive ? "bg-white text-primary" : "bg-red-500 text-white"
+                      isActive ? "bg-white dark:bg-black text-primary dark:text-white" : "bg-red-500 text-white"
                     }`}>
                       {unreadSupportCount}
                     </span>
@@ -355,7 +355,7 @@ export const Profile = () => {
                         </div>
                         <button
                           onClick={() => navigate("/wishlist")}
-                          className="px-3 py-1 bg-primary hover:bg-primary-dark text-white rounded-lg text-xs font-bold transition-all"
+                          className="px-3 py-1 bg-primary dark:bg-black hover:bg-primary-dark dark:hover:bg-neutral-900/50 text-white dark:text-white dark:border dark:border-white/50 rounded-lg text-xs font-bold transition-all"
                         >
                           View
                         </button>

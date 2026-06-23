@@ -100,7 +100,7 @@ export const Wishlist = () => {
                     className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all duration-300 flex items-center justify-center space-x-2 shadow-sm ${
                       outOfStock
                         ? "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
-                        : "bg-primary text-white hover:bg-primary-dark shadow-primary/10 hover:shadow-primary/20"
+                        : "bg-primary dark:bg-black text-white dark:text-white dark:border dark:border-white hover:bg-primary-dark dark:hover:bg-neutral-900/50 shadow-primary/10 dark:shadow-none hover:shadow-primary/20"
                     }`}
                   >
                     <ShoppingCart className="w-4 h-4" />

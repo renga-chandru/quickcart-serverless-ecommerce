@@ -63,7 +63,7 @@ export const Navbar = () => {
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <span className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-sans font-extrabold text-lg shadow-md shadow-primary/20">
+              <span className="w-8 h-8 rounded-lg bg-primary dark:bg-white flex items-center justify-center text-white dark:text-black font-sans font-extrabold text-lg shadow-md shadow-primary/20 dark:shadow-none">
                 Q
               </span>
               <span className="text-xl font-bold font-sans tracking-tight text-gradient-primary">
@@ -135,7 +135,7 @@ export const Navbar = () => {
             >
               <ShoppingCart className="w-5 h-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm animate-pulse">
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary dark:bg-white text-white dark:text-black rounded-full flex items-center justify-center text-[10px] font-bold shadow-sm animate-pulse">
                   {cartCount}
                 </span>
               )}
@@ -217,7 +217,7 @@ export const Navbar = () => {
               ) : (
                 <Link
                   to="/login"
-                  className="px-5 py-2 text-sm font-semibold bg-primary hover:bg-primary-dark text-white rounded-full shadow-md shadow-primary/10 hover:shadow-primary/20 transition-all duration-300 block"
+                  className="px-5 py-2 text-sm font-semibold bg-primary dark:bg-black dark:text-white dark:border dark:border-white hover:bg-primary-dark dark:hover:bg-neutral-900/50 text-white rounded-full shadow-md shadow-primary/10 dark:shadow-none hover:shadow-primary/20 transition-all duration-300 block"
                 >
                   Sign In
                 </Link>
@@ -300,7 +300,7 @@ export const Navbar = () => {
                 className="flex items-center justify-between text-base px-2 py-1.5 rounded-lg text-slate-650 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800/40"
               >
                 <span>Cart</span>
-                <span className="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{cartCount}</span>
+                <span className="bg-primary dark:bg-white text-white dark:text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{cartCount}</span>
               </Link>
             </div>
 
@@ -359,7 +359,7 @@ export const Navbar = () => {
                 <Link
                   to="/login"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full text-center px-4 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold shadow-md shadow-primary/10 transition-all duration-350"
+                  className="w-full text-center px-4 py-2.5 bg-primary dark:bg-black dark:text-white dark:border dark:border-white hover:bg-primary-dark dark:hover:bg-neutral-900/50 text-white rounded-xl font-bold shadow-md shadow-primary/10 dark:shadow-none transition-all duration-350"
                 >
                   Sign In
                 </Link>

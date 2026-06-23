@@ -163,7 +163,7 @@ export const ChatWindow = ({ name, email, userId }) => {
               <div
                 className={`w-7.5 h-7.5 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${
                   isUser
-                    ? "bg-primary text-white"
+                    ? "bg-primary text-white dark:bg-white dark:text-slate-950"
                     : "bg-slate-200 dark:bg-slate-850 text-slate-600 dark:text-slate-400"
                 }`}
               >
@@ -172,12 +172,12 @@ export const ChatWindow = ({ name, email, userId }) => {
               <div
                 className={`p-3.5 rounded-2xl text-sm leading-relaxed ${
                   isUser
-                    ? "bg-primary text-white"
+                    ? "bg-primary text-white dark:bg-white dark:text-slate-950"
                     : "bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-850 text-slate-700 dark:text-slate-300"
                 }`}
               >
                 <p className="whitespace-pre-line">{m.text}</p>
-                <span className={`block text-[9px] mt-1 text-right ${isUser ? "text-white/60" : "text-slate-400"}`}>
+                <span className={`block text-[9px] mt-1 text-right ${isUser ? "text-white/60 dark:text-slate-950/60" : "text-slate-400"}`}>
                   {new Date(m.timestamp).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
                 </span>
               </div>
@@ -204,7 +204,7 @@ export const ChatWindow = ({ name, email, userId }) => {
         <button
           type="submit"
           disabled={isClosed || !text.trim() || sending}
-          className="p-3 bg-primary hover:bg-primary-dark text-white rounded-xl shadow-md transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed flex-shrink-0"
+          className="p-3 bg-primary hover:bg-primary-dark text-white dark:bg-black dark:text-white dark:border dark:border-white/20 dark:hover:bg-neutral-900/50 rounded-xl shadow-md transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 disabled:cursor-not-allowed flex-shrink-0"
         >
           <Send className="w-4.5 h-4.5" />
         </button>

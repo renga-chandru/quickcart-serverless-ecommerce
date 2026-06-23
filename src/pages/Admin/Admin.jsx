@@ -1008,7 +1008,7 @@ export const Admin = () => {
                                 }`}
                               >
                                 <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold ${
-                                  isMe ? "bg-emerald-500 text-white" : "bg-primary text-white"
+                                  isMe ? "bg-emerald-500 text-white" : "bg-primary text-white dark:bg-white dark:text-slate-950"
                                 }`}>
                                   {isMe ? "AD" : "US"}
                                 </div>
