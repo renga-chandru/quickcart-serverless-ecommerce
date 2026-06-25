@@ -69,15 +69,6 @@ export const Login = () => {
     }
   };
 
-  const autofillUser = (role) => {
-    if (role === "customer") {
-      setEmail("user@quickcart.com");
-      setPassword("User@123");
-    } else {
-      setEmail("admin@quickcart.com");
-      setPassword("Admin@123");
-    }
-  };
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors">
@@ -187,30 +178,6 @@ export const Login = () => {
             </div>
           </div>
 
-          {/* Demo account autofill buttons */}
-          <div className="space-y-3 bg-slate-50 dark:bg-slate-950/40 p-4.5 rounded-2xl border border-slate-100 dark:border-slate-850 font-sans text-xs">
-            <p className="font-bold text-slate-450 uppercase tracking-widest text-[10px]">Autofill Demo Accounts</p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => autofillUser("customer")}
-                className="px-3 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 rounded-xl font-bold flex-1 text-center transition-colors shadow-sm"
-              >
-                Customer Demo
-              </button>
-              <button
-                type="button"
-                onClick={() => autofillUser("admin")}
-                className="px-3 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-100 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 rounded-xl font-bold flex-1 text-center transition-colors shadow-sm"
-              >
-                Admin Demo
-              </button>
-            </div>
-            <div className="text-[10px] text-slate-450 leading-relaxed pt-1 flex flex-col space-y-0.5">
-              <p>Customer: <strong className="font-semibold text-slate-700 dark:text-slate-300">user@quickcart.com</strong> / <strong className="font-semibold text-slate-700 dark:text-slate-300">User@123</strong></p>
-              <p>Admin: <strong className="font-semibold text-slate-700 dark:text-slate-300">admin@quickcart.com</strong> / <strong className="font-semibold text-slate-700 dark:text-slate-300">Admin@123</strong></p>
-            </div>
-          </div>
 
         </div>
 

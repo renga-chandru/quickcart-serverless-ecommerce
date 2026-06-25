@@ -60,7 +60,7 @@ const runTests = async () => {
     const adminLoginRes = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: "admin@quickcart.com", password: "Admin@123" })
+      body: JSON.stringify({ email: "admin@quickcart.com", password: "QuickCartAdminSecured2026!" })
     });
     const adminLoginData = await adminLoginRes.json();
     if (adminLoginRes.status === 200 && adminLoginData.token) {
