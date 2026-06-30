@@ -59,6 +59,16 @@ const CATEGORY_DISTRIBUTION = [
   { name: "Grocery", sales: 150 },
 ];
 
+const getPaymentMethodDisplay = (method) => {
+  if (!method) return "Not found";
+  const m = method.toLowerCase();
+  if (m.includes("card")) return "Card";
+  if (m.includes("upi")) return "UPI";
+  if (m.includes("net banking") || m.includes("banking")) return "Net Banking";
+  if (m.includes("delivery") || m.includes("cash") || m.includes("cod")) return "Cash on Delivery";
+  return method;
+};
+
 export const Admin = () => {
   const { user, isAdmin, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -777,6 +787,8 @@ export const Admin = () => {
                       <th className="p-4">Customer Details</th>
                       <th className="p-4">Items Count</th>
                       <th className="p-4">Total Price</th>
+                      <th className="p-4">Payment Method</th>
+                      <th className="p-4">Payment Status</th>
                       <th className="p-4">Active Status</th>
                       <th className="p-4 text-center">Status Action</th>
                     </tr>
@@ -793,6 +805,12 @@ export const Admin = () => {
                           </td>
                           <td className="p-4 font-semibold">{count} Items</td>
                           <td className="p-4 font-extrabold text-slate-900 dark:text-white">${ord.summary.total.toFixed(2)}</td>
+                          <td className="p-4 font-semibold text-slate-800 dark:text-white">{getPaymentMethodDisplay(ord.paymentMethod)}</td>
+                          <td className="p-4">
+                            <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-500">
+                              Paid
+                            </span>
+                          </td>
                           <td className="p-4">
                             <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-bold ${ord.status === "Delivered" ? "bg-emerald-500/10 text-emerald-500" : "bg-primary/10 text-primary animate-pulse"
                               }`}>
