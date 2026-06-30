@@ -35,11 +35,31 @@ export const Checkout = () => {
   const [paymentMethod, setPaymentMethod] = useState("Credit Card");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Payment State
+  const [paymentData, setPaymentData] = useState({
+    upiId: "",
+    cardName: "",
+    cardNumber: "",
+    cardExpiry: "",
+    cardCvv: "",
+    bank: "",
+    bankAccountName: ""
+  });
+  const [paymentErrors, setPaymentErrors] = useState({});
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (formErrors[name]) {
       setFormErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handlePaymentInputChange = (e) => {
+    const { name, value } = e.target;
+    setPaymentData((prev) => ({ ...prev, [name]: value }));
+    if (paymentErrors[name]) {
+      setPaymentErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -58,11 +78,56 @@ export const Checkout = () => {
     return Object.keys(errors).length === 0;
   };
 
+  const validatePayment = () => {
+    const errors = {};
+    if (paymentMethod === "UPI Payment") {
+      if (!paymentData.upiId.trim()) {
+        errors.upiId = "UPI ID is required";
+      } else if (!/^[\w.-]+@[\w.-]+$/.test(paymentData.upiId.trim())) {
+        errors.upiId = "Invalid UPI ID format (e.g. username@bank)";
+      }
+    } else if (paymentMethod === "Credit Card") {
+      if (!paymentData.cardName.trim()) {
+        errors.cardName = "Cardholder Name is required";
+      }
+      if (!paymentData.cardNumber.trim()) {
+        errors.cardNumber = "Card Number is required";
+      } else if (!/^\d{13,19}$/.test(paymentData.cardNumber.replace(/\s/g, ""))) {
+        errors.cardNumber = "Card Number must be numeric and between 13 and 19 digits";
+      }
+      if (!paymentData.cardExpiry.trim()) {
+        errors.cardExpiry = "Expiry Date is required";
+      } else if (!/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(paymentData.cardExpiry.trim())) {
+        errors.cardExpiry = "Expiry Date must be in MM/YY format";
+      }
+      if (!paymentData.cardCvv.trim()) {
+        errors.cardCvv = "CVV is required";
+      } else if (!/^\d{3,4}$/.test(paymentData.cardCvv.trim())) {
+        errors.cardCvv = "CVV must be 3 or 4 digits";
+      }
+    } else if (paymentMethod === "Net Banking") {
+      if (!paymentData.bank) {
+        errors.bank = "Please select a bank";
+      }
+      if (!paymentData.bankAccountName.trim()) {
+        errors.bankAccountName = "Account Holder Name is required";
+      }
+    }
+    setPaymentErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    const isAddressValid = validateForm();
+    const isPaymentValid = validatePayment();
+    if (!isAddressValid || !isPaymentValid) return;
 
     setIsSubmitting(true);
+
+    // Simulate payment processing (1.5 seconds)
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
     try {
       // Assemble order payload
       const orderPayload = {
@@ -209,7 +274,7 @@ export const Checkout = () => {
               {paymentOptions.map((opt) => (
                 <label
                   key={opt.id}
-                  onClick={() => setPaymentMethod(opt.name)}
+                  onClick={() => { setPaymentMethod(opt.name); setPaymentErrors({}); }}
                   className={`p-5 rounded-2xl border cursor-pointer flex items-start space-x-3.5 transition-all duration-350 ${
                     paymentMethod === opt.name
                       ? "border-primary bg-primary/5 dark:bg-primary/10 shadow-sm"
@@ -230,6 +295,114 @@ export const Checkout = () => {
                 </label>
               ))}
             </div>
+
+            {/* Payment Details Form */}
+            {paymentMethod !== "Cash on Delivery" && (
+              <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-850 space-y-4">
+                <h3 className="text-md font-bold text-slate-800 dark:text-white mb-2">
+                  Enter {paymentMethod} Details
+                </h3>
+                
+                {paymentMethod === "UPI Payment" && (
+                  <div className="grid grid-cols-1 gap-4 max-w-md">
+                    <Input
+                      label="UPI ID"
+                      name="upiId"
+                      value={paymentData.upiId}
+                      onChange={handlePaymentInputChange}
+                      placeholder="username@okaxis"
+                      error={paymentErrors.upiId}
+                      required
+                    />
+                  </div>
+                )}
+
+                {paymentMethod === "Credit Card" && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Input
+                        label="Cardholder Name"
+                        name="cardName"
+                        value={paymentData.cardName}
+                        onChange={handlePaymentInputChange}
+                        error={paymentErrors.cardName}
+                        required
+                      />
+                      <Input
+                        label="Card Number"
+                        name="cardNumber"
+                        value={paymentData.cardNumber}
+                        onChange={handlePaymentInputChange}
+                        placeholder="1111 2222 3333 4444"
+                        error={paymentErrors.cardNumber}
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Input
+                        label="Expiry Date"
+                        name="cardExpiry"
+                        value={paymentData.cardExpiry}
+                        onChange={handlePaymentInputChange}
+                        placeholder="MM/YY"
+                        error={paymentErrors.cardExpiry}
+                        required
+                      />
+                      <Input
+                        label="CVV"
+                        name="cardCvv"
+                        type="password"
+                        maxLength={4}
+                        value={paymentData.cardCvv}
+                        onChange={handlePaymentInputChange}
+                        placeholder="123"
+                        error={paymentErrors.cardCvv}
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {paymentMethod === "Net Banking" && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col space-y-1.5 w-full text-left">
+                      <label className="text-sm font-medium text-slate-700 dark:text-slate-300 font-sans flex items-center">
+                        Select Bank
+                        <span className="text-red-500 ml-1">*</span>
+                      </label>
+                      <select
+                        name="bank"
+                        value={paymentData.bank}
+                        onChange={handlePaymentInputChange}
+                        className={`w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-300 font-sans ${
+                          paymentErrors.bank ? "border-red-500 focus:ring-red-500/20 focus:border-red-500" : ""
+                        }`}
+                      >
+                        <option value="">-- Choose a Bank --</option>
+                        <option value="Chase Bank">Chase Bank</option>
+                        <option value="Bank of America">Bank of America</option>
+                        <option value="Wells Fargo">Wells Fargo</option>
+                        <option value="Citibank">Citibank</option>
+                        <option value="Capital One">Capital One</option>
+                      </select>
+                      {paymentErrors.bank && (
+                        <span className="text-xs font-medium text-red-500 font-sans">
+                          {paymentErrors.bank}
+                        </span>
+                      )}
+                    </div>
+                    <Input
+                      label="Account Holder Name"
+                      name="bankAccountName"
+                      value={paymentData.bankAccountName}
+                      onChange={handlePaymentInputChange}
+                      error={paymentErrors.bankAccountName}
+                      required
+                    />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           
           {/* Submit */}
