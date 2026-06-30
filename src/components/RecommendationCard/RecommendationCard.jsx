@@ -119,15 +119,15 @@ export const RecommendationCard = ({ product, matchPercentage = 95, onQuickView 
             {hasDiscount ? (
               <>
                 <span className="text-xs text-slate-400 dark:text-slate-500 line-through">
-                  ${product.price.toFixed(2)}
+                  ₹{product.price.toFixed(2)}
                 </span>
                 <span className="text-lg font-bold text-slate-850 dark:text-white">
-                  ${finalPrice.toFixed(2)}
+                  ₹{finalPrice.toFixed(2)}
                 </span>
               </>
             ) : (
               <span className="text-lg font-bold text-slate-850 dark:text-white">
-                ${product.price.toFixed(2)}
+                ₹{product.price.toFixed(2)}
               </span>
             )}
           </div>

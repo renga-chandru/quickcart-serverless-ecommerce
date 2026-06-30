@@ -129,7 +129,7 @@ export const Home = () => {
           >
             <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-light font-sans text-xs font-bold uppercase tracking-wider">
               <Zap className="w-4.5 h-4.5 fill-current" />
-              <span>Next-Gen E-Commerce Platform</span>
+              <span>Your Trusted Online Shopping Destination</span>
             </div>
             
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-sans leading-tight text-slate-900 dark:text-white">
@@ -137,7 +137,7 @@ export const Home = () => {
             </h1>
             
             <p className="text-lg text-slate-500 dark:text-slate-400 font-medium max-w-lg leading-relaxed">
-              Experience lightning-fast browsing, robust security, and cloud-ready infrastructure. Built for modern shopping.
+              Shop Smart, Shop Easy. Discover Quality Products at Affordable Prices with Fast Delivery Across India.
             </p>
 
             {/* Badges */}
@@ -148,7 +148,7 @@ export const Home = () => {
               <span className="text-primary">•</span>
               <span>Secure</span>
               <span className="text-primary">•</span>
-              <span>Cloud Ready</span>
+              <span>Fast Delivery</span>
             </div>
 
             {/* Buttons */}
@@ -188,7 +188,7 @@ export const Home = () => {
               <div className="flex justify-between items-center">
                 <div>
                   <h4 className="font-bold text-slate-800 dark:text-white">QuickCart Dashboard</h4>
-                  <p className="text-xs text-slate-400 dark:text-slate-500">AWS Cloud Architecture Ready</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500">Trusted by Thousands of Customers</p>
                 </div>
                 <span className="text-xs bg-emerald-500/10 text-emerald-500 font-bold px-2.5 py-1 rounded-full">
                   Operational
@@ -202,7 +202,7 @@ export const Home = () => {
                 </div>
                 <div className="text-left">
                   <p className="text-xs text-slate-400">Products Catalog</p>
-                  <p className="text-sm font-bold text-slate-800 dark:text-white">Backend-Agnostic</p>
+                  <p className="text-sm font-bold text-slate-800 dark:text-white">Quality Assured</p>
                 </div>
               </div>
             </div>
@@ -366,7 +366,7 @@ export const Home = () => {
               Why Choose QuickCart?
             </h2>
             <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
-              We leverage modern infrastructure and premium operations for a seamless shopping experience.
+              We focus on providing high-quality products, swift shipping, and exceptional customer support for a seamless experience.
             </p>
           </div>
 

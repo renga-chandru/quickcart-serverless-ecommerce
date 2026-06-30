@@ -90,9 +90,9 @@ export const Contact = () => {
   };
 
   const contactInfos = [
-    { icon: Phone, title: "Support Phone", value: "+1 (555) 019-2834", desc: "Monday – Friday, 9am – 6pm EST" },
-    { icon: Mail, title: "Email Address", value: "support@quickcart.com", desc: "Average response within 2 hours" },
-    { icon: MapPin, title: "Headquarters", value: "120 Vercel Way, Suite 400", desc: "San Francisco, CA 94107" }
+    { icon: Phone, title: "Support Phone", value: "+91 98765 43210", desc: "Monday – Saturday, 9:00 AM – 6:00 PM" },
+    { icon: Mail, title: "Email Address", value: "support@quickcart.in", desc: "Average response within 2 hours" },
+    { icon: MapPin, title: "Headquarters", value: "Coimbatore, Tamil Nadu, India", desc: "123, Avinashi Road, Coimbatore - 641018" }
   ];
 
   return (
@@ -104,7 +104,7 @@ export const Contact = () => {
           Get in Touch
         </h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
-          Have questions about orders, payments, or cloud deployments? Contact our support staff.
+          Have questions about orders, payments, or your shopping experience? Our friendly support team is here to help!
         </p>
       </div>
 
@@ -155,7 +155,7 @@ export const Contact = () => {
                   label="Your Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Jane Doe"
+                  placeholder="e.g. Priya Sharma"
                   required
                   disabled={!!user}
                 />
@@ -164,7 +164,7 @@ export const Contact = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. jane@example.com"
+                  placeholder="e.g. priya@example.com"
                   required
                   disabled={!!user}
                 />

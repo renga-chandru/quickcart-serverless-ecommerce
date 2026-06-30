@@ -175,7 +175,7 @@ const runTests = async () => {
         }
       ],
       summary: { subtotal: 999, tax: 80, shipping: 0, discount: 0, total: 1079 },
-      shippingAddress: { name: "John Doe", street: "120 Vercel Way", city: "San Francisco", state: "CA", zip: "94107", country: "US" },
+      shippingAddress: { name: "Arun Kumar", street: "123, Avinashi Road", city: "Coimbatore", state: "Tamil Nadu", zip: "641018", country: "India" },
       paymentMethod: "Credit Card"
     };
 
@@ -208,7 +208,7 @@ const runTests = async () => {
         }
       ],
       summary: { subtotal: 2697.30, tax: 215.78, shipping: 0, discount: 0, total: 2913.08 },
-      shippingAddress: { name: "John Doe", street: "120 Vercel Way", city: "San Francisco", state: "CA", zip: "94107", country: "US" },
+      shippingAddress: { name: "Arun Kumar", street: "123, Avinashi Road", city: "Coimbatore", state: "Tamil Nadu", zip: "641018", country: "India" },
       paymentMethod: "Credit Card"
     };
 
@@ -256,7 +256,7 @@ const runTests = async () => {
         }
       ],
       summary: { subtotal: 999 * newStock, tax: 80, shipping: 0, discount: 0, total: 1079 },
-      shippingAddress: { name: "John Doe", street: "120 Vercel Way", city: "San Francisco", state: "CA", zip: "94107", country: "US" },
+      shippingAddress: { name: "Arun Kumar", street: "123, Avinashi Road", city: "Coimbatore", state: "Tamil Nadu", zip: "641018", country: "India" },
       paymentMethod: "Credit Card"
     };
 
@@ -296,7 +296,7 @@ const runTests = async () => {
       body: JSON.stringify({
         items: [{ id: "prod-1", name: "iPhone 15 Pro", price: 999, quantity: 1, image: "" }],
         summary: { subtotal: 999, tax: 80, shipping: 0, discount: 0, total: 1079 },
-        shippingAddress: { name: "John Doe", street: "120 Vercel Way", city: "San Francisco", state: "CA", zip: "94107", country: "US" },
+        shippingAddress: { name: "Arun Kumar", street: "123, Avinashi Road", city: "Coimbatore", state: "Tamil Nadu", zip: "641018", country: "India" },
         paymentMethod: "Credit Card"
       })
     });

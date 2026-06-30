@@ -1,11 +1,11 @@
 export const CATEGORIES = [
   { id: "electronics", name: "Electronics", icon: "Laptop", count: 3, image: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?q=80&w=600&auto=format&fit=crop" },
   { id: "fashion", name: "Fashion", icon: "Shirt", count: 2, image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=600&auto=format&fit=crop" },
-  { id: "home", name: "Home", icon: "Home", count: 2, image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?q=80&w=600&auto=format&fit=crop" },
+  { id: "home", name: "Home & Kitchen", icon: "Home", count: 2, image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?q=80&w=600&auto=format&fit=crop" },
   { id: "books", name: "Books", icon: "BookOpen", count: 1, image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop" },
   { id: "sports", name: "Sports", icon: "Dumbbell", count: 1, image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?q=80&w=600&auto=format&fit=crop" },
-  { id: "grocery", name: "Grocery", icon: "Apple", count: 1, image: "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=600&auto=format&fit=crop" },
-  { id: "beauty", name: "Beauty", icon: "Sparkles", count: 1, image: "https://images.unsplash.com/photo-1608248597481-496100c8c836?q=80&w=600&auto=format&fit=crop" },
+  { id: "grocery", name: "Groceries", icon: "Apple", count: 1, image: "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=600&auto=format&fit=crop" },
+  { id: "beauty", name: "Beauty & Personal Care", icon: "Sparkles", count: 1, image: "https://images.unsplash.com/photo-1608248597481-496100c8c836?q=80&w=600&auto=format&fit=crop" },
   { id: "furniture", name: "Furniture", icon: "Armchair", count: 1, image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?q=80&w=600&auto=format&fit=crop" },
   { id: "mobiles", name: "Mobiles", icon: "Smartphone", count: 4, image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=600&auto=format&fit=crop" },
   { id: "laptops", name: "Laptops", icon: "Laptop", count: 4, image: "https://images.unsplash.com/photo-1496181130204-7552cc14ac1a?q=80&w=600&auto=format&fit=crop" },
@@ -153,7 +153,7 @@ export const PRODUCTS = [
     discount: 10,
     rating: 4.4,
     stock: 3,
-    category: "Home",
+    category: "Home & Kitchen",
     images: [
       "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?q=80&w=600&auto=format&fit=crop"
     ],
@@ -250,7 +250,7 @@ export const PRODUCTS = [
     discount: 5,
     rating: 4.5,
     stock: 45,
-    category: "Home",
+    category: "Home & Kitchen",
     images: [
       "https://images.unsplash.com/photo-1603006905003-be475563bc59?q=80&w=600&auto=format&fit=crop"
     ],
@@ -274,7 +274,7 @@ export const PRODUCTS = [
     discount: 10,
     rating: 4.8,
     stock: 50,
-    category: "Grocery",
+    category: "Groceries",
     images: [
       "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?q=80&w=600&auto=format&fit=crop"
     ],
@@ -298,7 +298,7 @@ export const PRODUCTS = [
     discount: 0,
     rating: 4.6,
     stock: 60,
-    category: "Beauty",
+    category: "Beauty & Personal Care",
     images: [
       "https://images.unsplash.com/photo-1608248597481-496100c8c836?q=80&w=600&auto=format&fit=crop"
     ],
@@ -1083,24 +1083,24 @@ export const PRODUCTS = [
 export const TESTIMONIALS = [
   {
     id: 1,
-    name: "Sophia Carter",
+    name: "Priya Menon – Kochi",
     rating: 5,
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop",
-    review: "Shopping on QuickCart is lightning fast. The checkout flow is clean and premium, and the delivery arrived early!"
+    review: "Shopping on QuickCart is extremely convenient and fast. The checkout flow is very smooth, and my delivery arrived a day early in Kochi!"
   },
   {
     id: 2,
-    name: "Liam Henderson",
+    name: "Rahul Kumar – Chennai",
     rating: 5,
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop",
-    review: "Outstanding quality. The user interface looks just as modern as Apple or Stripe. Highly recommend their smart devices!"
+    review: "Outstanding quality. The user interface is very clean and easy to navigate. Highly recommend their home & kitchen catalog!"
   },
   {
     id: 3,
-    name: "Amara Jenkins",
+    name: "Ananya Sharma – Bengaluru",
     rating: 4,
     avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=150&auto=format&fit=crop",
-    review: "Easy navigation, beautiful search experience, and high-quality customer support. Truly a cloud-ready platform."
+    review: "Excellent collection of products, fast delivery, and very responsive customer support. Truly the best shopping platform."
   }
 ];
 
@@ -1108,17 +1108,17 @@ export const WHY_CHOOSE_US = [
   {
     icon: "Truck",
     title: "Fast Delivery",
-    desc: "Free 2-day shipping on all items over $50, delivered straight to your doorstep."
+    desc: "Free shipping across India on all orders over ₹499, delivered straight to your doorstep."
   },
   {
     icon: "ShieldCheck",
     title: "Secure Payments",
-    desc: "End-to-end encrypted transactions via major cards, UPI, and internet banking."
+    desc: "End-to-end encrypted transactions via major cards, UPI, and net banking."
   },
   {
-    icon: "Cloud",
-    title: "Cloud Powered",
-    desc: "Built on optimized serverless technology for sub-second page loads."
+    icon: "Star",
+    title: "100% Genuine Products",
+    desc: "All catalog listings are curated and verified directly from trusted brands for authentic quality."
   },
   {
     icon: "Star",

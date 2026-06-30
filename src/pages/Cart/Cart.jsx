@@ -78,10 +78,10 @@ export const Cart = () => {
                       {item.name}
                     </Link>
                     <p className="text-sm font-bold text-slate-805 dark:text-slate-150 font-sans">
-                      ${item.finalPrice.toFixed(2)}
+                      ₹{item.finalPrice.toFixed(2)}
                       {item.discount > 0 && (
                         <span className="text-xs text-slate-400 line-through font-medium ml-2">
-                          ${item.price.toFixed(2)}
+                          ₹{item.price.toFixed(2)}
                         </span>
                       )}
                     </p>
@@ -120,7 +120,7 @@ export const Cart = () => {
 
                   {/* Subtotal of item */}
                   <span className="text-sm font-bold text-slate-800 dark:text-white font-sans w-20 text-right">
-                    ${(item.finalPrice * item.quantity).toFixed(2)}
+                    ₹{(item.finalPrice * item.quantity).toFixed(2)}
                   </span>
 
                   {/* Remove action */}
@@ -157,32 +157,32 @@ export const Cart = () => {
             <div className="space-y-3.5 text-sm font-sans">
               <div className="flex justify-between text-slate-500 dark:text-slate-400">
                 <span>Subtotal</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200">${summary.subtotal.toFixed(2)}</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">₹{summary.subtotal.toFixed(2)}</span>
               </div>
 
               {/* Coupon discounts */}
               {summary.discount > 0 && (
                 <div className="flex justify-between text-emerald-500 font-medium">
                   <span>Coupon Discount</span>
-                  <span>-${summary.discount.toFixed(2)}</span>
+                  <span>-₹{summary.discount.toFixed(2)}</span>
                 </div>
               )}
 
               <div className="flex justify-between text-slate-500 dark:text-slate-400">
                 <span>Sales Tax (8%)</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200">${summary.tax.toFixed(2)}</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200">₹{summary.tax.toFixed(2)}</span>
               </div>
 
               <div className="flex justify-between text-slate-500 dark:text-slate-400">
                 <span>Shipping Fee</span>
                 <span className="font-semibold text-slate-805 dark:text-slate-200">
-                  {summary.shipping === 0 ? "FREE" : `$${summary.shipping.toFixed(2)}`}
+                  {summary.shipping === 0 ? "FREE" : `₹${summary.shipping.toFixed(2)}`}
                 </span>
               </div>
 
               <div className="border-t border-slate-100 dark:border-slate-850 pt-4 flex justify-between text-base font-extrabold text-slate-900 dark:text-white">
                 <span>Grand Total</span>
-                <span>${summary.total.toFixed(2)}</span>
+                <span>₹{summary.total.toFixed(2)}</span>
               </div>
             </div>
 

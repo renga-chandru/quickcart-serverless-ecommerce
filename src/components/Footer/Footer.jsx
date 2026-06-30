@@ -32,7 +32,7 @@ export const Footer = () => {
             </span>
           </Link>
           <p className="text-slate-500 dark:text-slate-400 text-sm max-w-sm leading-relaxed">
-            QuickCart is a premium, serverless-ready, high-performance product catalog platform designed for modern, lightning-fast digital storefronts.
+            QuickCart is an online shopping platform dedicated to providing quality products, affordable prices, and a smooth shopping experience for customers across India.
           </p>
           {/* Social Icons */}
           <div className="flex space-x-4 pt-2">

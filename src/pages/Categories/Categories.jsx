@@ -29,7 +29,7 @@ export const Categories = () => {
           Explore Product Collections
         </h1>
         <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
-          Select a collection below to browse curated, premium serverless products suited for your tech, style, or home space.
+          Select a collection below to browse curated, premium products suited for your tech, style, or home space.
         </p>
       </div>
 

@@ -219,10 +219,10 @@ export const ProductDetails = () => {
               {product.discount > 0 ? (
                 <>
                   <span className="text-3xl font-black text-slate-900 dark:text-white font-sans">
-                    ${finalPrice.toFixed(2)}
+                    ₹{finalPrice.toFixed(2)}
                   </span>
                   <span className="text-base text-slate-400 line-through">
-                    ${product.price.toFixed(2)}
+                    ₹{product.price.toFixed(2)}
                   </span>
                   <span className="text-xs bg-red-100 text-red-650 font-bold px-2 py-0.5 rounded-md">
                     Save {product.discount}%
@@ -230,7 +230,7 @@ export const ProductDetails = () => {
                 </>
               ) : (
                 <span className="text-3xl font-black text-slate-900 dark:text-white font-sans">
-                  ${product.price.toFixed(2)}
+                  ₹{product.price.toFixed(2)}
                 </span>
               )}
             </div>
@@ -307,7 +307,7 @@ export const ProductDetails = () => {
             <div className="grid grid-cols-3 gap-4 border-t border-slate-100 dark:border-slate-850 pt-6 text-xs font-semibold text-slate-600 dark:text-slate-400">
               <div className="flex items-center space-x-2.5">
                 <Truck className="w-4 h-4 text-primary" />
-                <span>Free Shipping (+$150)</span>
+                <span>Free Shipping (over ₹499)</span>
               </div>
               <div className="flex items-center space-x-2.5">
                 <Shield className="w-4 h-4 text-secondary" />

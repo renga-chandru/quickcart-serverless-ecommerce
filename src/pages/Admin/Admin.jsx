@@ -7,7 +7,7 @@ import {
   Users,
   Layers,
   Settings,
-  DollarSign,
+  IndianRupee,
   Plus,
   Trash2,
   Edit2,
@@ -535,11 +535,11 @@ export const Admin = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider">Total Revenue</span>
                     <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg">
-                      <DollarSign className="w-5 h-5" />
+                      <IndianRupee className="w-5 h-5" />
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-2xl font-black text-slate-900 dark:text-white font-sans">$14,890.00</h3>
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white font-sans">₹14,890.00</h3>
                     <p className="text-xs text-emerald-500 font-bold mt-1">+12% from last month</p>
                   </div>
                 </div>
@@ -591,7 +591,7 @@ export const Admin = () => {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Revenue chart (Col span 2) */}
                 <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/50 p-6 rounded-3xl shadow-sm text-left">
-                  <h4 className="text-base font-bold text-slate-800 dark:text-white mb-6 font-sans">Monthly Revenue Performance ($)</h4>
+                  <h4 className="text-base font-bold text-slate-800 dark:text-white mb-6 font-sans">Monthly Revenue Performance (₹)</h4>
                   <div className="h-72">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={SALES_DATA}>
@@ -658,7 +658,7 @@ export const Admin = () => {
                             {ord.status}
                           </span>
                         </td>
-                        <td className="py-3.5 font-bold text-slate-800 dark:text-white">${ord.summary.total.toFixed(2)}</td>
+                        <td className="py-3.5 font-bold text-slate-800 dark:text-white">₹{ord.summary.total.toFixed(2)}</td>
                         <td className="py-3.5 text-right font-medium">{ord.paymentMethod}</td>
                       </tr>
                     ))}
@@ -713,7 +713,7 @@ export const Admin = () => {
                           </div>
                         </td>
                         <td className="p-4 font-semibold text-slate-700 dark:text-slate-300">{prod.category}</td>
-                        <td className="p-4 font-extrabold text-slate-850 dark:text-white">${prod.price.toFixed(2)}</td>
+                        <td className="p-4 font-extrabold text-slate-850 dark:text-white">₹{prod.price.toFixed(2)}</td>
                         <td className="p-4 font-bold text-red-500">{prod.discount || 0}% OFF</td>
                         <td className="p-4 font-semibold">
                           <span className={`px-2 py-0.5 rounded-full text-xs ${prod.stock <= 0 ? "bg-red-500/10 text-red-500" : "bg-emerald-500/10 text-emerald-500"
@@ -804,7 +804,7 @@ export const Admin = () => {
                             <p className="text-xs text-slate-400">{ord.shippingAddress.city}, {ord.shippingAddress.state}</p>
                           </td>
                           <td className="p-4 font-semibold">{count} Items</td>
-                          <td className="p-4 font-extrabold text-slate-900 dark:text-white">${ord.summary.total.toFixed(2)}</td>
+                          <td className="p-4 font-extrabold text-slate-900 dark:text-white">₹{ord.summary.total.toFixed(2)}</td>
                           <td className="p-4 font-semibold text-slate-800 dark:text-white">{getPaymentMethodDisplay(ord.paymentMethod)}</td>
                           <td className="p-4">
                             <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-500">
@@ -880,7 +880,7 @@ export const Admin = () => {
                   disabled
                 />
                 <span className="text-[10px] text-slate-450 font-bold block">
-                  This values maps to AWS Cloud instances later. To connect DynamoDB/Lambda simply edit the config file.
+                  This value defines the backend server endpoint configured for your storefront.
                 </span>
               </div>
             </div>
@@ -1245,7 +1245,7 @@ export const Admin = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Price ($)"
+              label="Price (₹)"
               type="number"
               value={productForm.price}
               onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
@@ -1342,7 +1342,7 @@ export const Admin = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <Input
-                label="Price ($)"
+                label="Price (₹)"
                 type="number"
                 value={productForm.price}
                 onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}

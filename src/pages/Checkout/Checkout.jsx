@@ -28,7 +28,7 @@ export const Checkout = () => {
     city: user?.address?.city || "",
     state: user?.address?.state || "",
     zip: user?.address?.zip || "",
-    country: user?.address?.country || "United States",
+    country: user?.address?.country || "India",
   });
   
   const [formErrors, setFormErrors] = useState({});
@@ -162,9 +162,9 @@ export const Checkout = () => {
   };
 
   const paymentOptions = [
-    { id: "credit-card", name: "Credit Card", desc: "Pay with Visa, Mastercard, or AMEX" },
-    { id: "upi", name: "UPI Payment", desc: "Pay instantly via PhonePe, GPay, or Paytm" },
-    { id: "net-banking", name: "Net Banking", desc: "Secure transfer via major banks" },
+    { id: "credit-card", name: "Credit Card", desc: "Pay with Credit or Debit Cards (Visa, Mastercard, RuPay, Maestro)" },
+    { id: "upi", name: "UPI Payment", desc: "Pay instantly via UPI (PhonePe, Google Pay, Paytm)" },
+    { id: "net-banking", name: "Net Banking", desc: "Secure transfer via major Indian banks (SBI, HDFC, ICICI)" },
     { id: "cod", name: "Cash on Delivery", desc: "Pay on arrival of your package" }
   ];
 
@@ -379,11 +379,11 @@ export const Checkout = () => {
                         }`}
                       >
                         <option value="">-- Choose a Bank --</option>
-                        <option value="Chase Bank">Chase Bank</option>
-                        <option value="Bank of America">Bank of America</option>
-                        <option value="Wells Fargo">Wells Fargo</option>
-                        <option value="Citibank">Citibank</option>
-                        <option value="Capital One">Capital One</option>
+                        <option value="State Bank of India">State Bank of India</option>
+                        <option value="HDFC Bank">HDFC Bank</option>
+                        <option value="ICICI Bank">ICICI Bank</option>
+                        <option value="Axis Bank">Axis Bank</option>
+                        <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
                       </select>
                       {paymentErrors.bank && (
                         <span className="text-xs font-medium text-red-500 font-sans">
@@ -413,7 +413,7 @@ export const Checkout = () => {
               isLoading={isSubmitting}
               className="px-8 w-full sm:w-auto"
             >
-              Place Order (${summary.total.toFixed(2)})
+              Place Order (₹{summary.total.toFixed(2)})
             </Button>
           </div>
         </form>
@@ -440,7 +440,7 @@ export const Checkout = () => {
                       <p className="text-xs text-slate-400">Qty: {item.quantity}</p>
                     </div>
                   </div>
-                  <span className="font-bold text-slate-800 dark:text-white">${(item.finalPrice * item.quantity).toFixed(2)}</span>
+                  <span className="font-bold text-slate-800 dark:text-white">₹{(item.finalPrice * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
             </div>
@@ -449,25 +449,25 @@ export const Checkout = () => {
             <div className="border-t border-slate-100 dark:border-slate-850 pt-4 space-y-2 text-xs font-semibold text-slate-500 dark:text-slate-400 font-sans">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>${summary.subtotal.toFixed(2)}</span>
+                <span>₹{summary.subtotal.toFixed(2)}</span>
               </div>
               {summary.discount > 0 && (
-                <div className="flex justify-between text-emerald-500">
+                <div className="flex justify-between text-emerald-500 font-semibold">
                   <span>Discount</span>
-                  <span>-${summary.discount.toFixed(2)}</span>
+                  <span>-₹{summary.discount.toFixed(2)}</span>
                 </div>
               )}
               <div className="flex justify-between">
                 <span>Sales Tax</span>
-                <span>${summary.tax.toFixed(2)}</span>
+                <span>₹{summary.tax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>{summary.shipping === 0 ? "FREE" : `$${summary.shipping.toFixed(2)}`}</span>
+                <span>{summary.shipping === 0 ? "FREE" : `₹${summary.shipping.toFixed(2)}`}</span>
               </div>
               <div className="border-t border-slate-100 dark:border-slate-850 pt-3 flex justify-between text-sm font-extrabold text-slate-900 dark:text-white">
                 <span>Grand Total</span>
-                <span>${summary.total.toFixed(2)}</span>
+                <span>₹{summary.total.toFixed(2)}</span>
               </div>
             </div>
           </div>

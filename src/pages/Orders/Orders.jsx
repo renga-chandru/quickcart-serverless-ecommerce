@@ -144,7 +144,7 @@ export const Orders = () => {
                   
                   <div className="text-right">
                     <p className="text-xs text-slate-400">{itemsCount} {itemsCount === 1 ? "Item" : "Items"}</p>
-                    <p className="text-base font-extrabold text-slate-900 dark:text-white mt-0.5">${order.summary.total.toFixed(2)}</p>
+                    <p className="text-base font-extrabold text-slate-900 dark:text-white mt-0.5">₹{order.summary.total.toFixed(2)}</p>
                   </div>
                 </div>
               </div>

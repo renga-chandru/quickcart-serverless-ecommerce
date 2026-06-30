@@ -42,7 +42,7 @@ export const Profile = () => {
     city: user?.address?.city || "",
     state: user?.address?.state || "",
     zip: user?.address?.zip || "",
-    country: user?.address?.country || "United States"
+    country: user?.address?.country || "India"
   });
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export const Profile = () => {
         city: user.address?.city || "",
         state: user.address?.state || "",
         zip: user.address?.zip || "",
-        country: user.address?.country || "United States"
+        country: user.address?.country || "India"
       });
     }
   }, [user]);
@@ -308,7 +308,7 @@ export const Profile = () => {
                       <div key={ord.id} className="py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div className="space-y-1">
                           <p className="text-sm font-bold text-slate-800 dark:text-white">{ord.id}</p>
-                          <p className="text-xs text-slate-400">Date: {ord.date} &bull; Total: ${ord.summary.total.toFixed(2)}</p>
+                          <p className="text-xs text-slate-400">Date: {ord.date} &bull; Total: ₹{ord.summary.total.toFixed(2)}</p>
                         </div>
                         <div className="flex items-center space-x-3 w-full sm:w-auto justify-between sm:justify-end">
                           <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
@@ -351,7 +351,7 @@ export const Profile = () => {
                         <img src={item.image} alt="" className="w-12 h-12 rounded-lg object-cover bg-white" />
                         <div className="flex-grow min-w-0">
                           <h4 className="font-bold text-sm text-slate-800 dark:text-white truncate">{item.name}</h4>
-                          <p className="text-xs text-slate-400 font-sans font-bold mt-0.5">${item.price.toFixed(2)}</p>
+                          <p className="text-xs text-slate-400 font-sans font-bold mt-0.5">₹{item.price.toFixed(2)}</p>
                         </div>
                         <button
                           onClick={() => navigate("/wishlist")}

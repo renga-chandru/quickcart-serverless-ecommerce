@@ -12,11 +12,11 @@ dotenv.config();
 const CATEGORIES = [
   { id: "electronics", name: "Electronics", icon: "Laptop", count: 0, image: "https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?q=80&w=600&auto=format&fit=crop" },
   { id: "fashion", name: "Fashion", icon: "Shirt", count: 0, image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=600&auto=format&fit=crop" },
-  { id: "home", name: "Home", icon: "Home", count: 0, image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?q=80&w=600&auto=format&fit=crop" },
+  { id: "home", name: "Home & Kitchen", icon: "Home", count: 0, image: "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?q=80&w=600&auto=format&fit=crop" },
   { id: "books", name: "Books", icon: "BookOpen", count: 0, image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop" },
   { id: "sports", name: "Sports", icon: "Dumbbell", count: 0, image: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?q=80&w=600&auto=format&fit=crop" },
-  { id: "grocery", name: "Grocery", icon: "Apple", count: 0, image: "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=600&auto=format&fit=crop" },
-  { id: "beauty", name: "Beauty", icon: "Sparkles", count: 0, image: "https://images.unsplash.com/photo-1608248597481-496100c8c836?q=80&w=600&auto=format&fit=crop" },
+  { id: "grocery", name: "Groceries", icon: "Apple", count: 0, image: "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=600&auto=format&fit=crop" },
+  { id: "beauty", name: "Beauty & Personal Care", icon: "Sparkles", count: 0, image: "https://images.unsplash.com/photo-1608248597481-496100c8c836?q=80&w=600&auto=format&fit=crop" },
   { id: "furniture", name: "Furniture", icon: "Armchair", count: 0, image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?q=80&w=600&auto=format&fit=crop" },
   { id: "mobiles", name: "Mobiles", icon: "Smartphone", count: 0, image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=600&auto=format&fit=crop" },
   { id: "laptops", name: "Laptops", icon: "Laptop", count: 0, image: "https://images.unsplash.com/photo-1496181130204-7552cc14ac1a?q=80&w=600&auto=format&fit=crop" },
@@ -164,7 +164,7 @@ const PRODUCTS = [
     discount: 10,
     rating: 4.4,
     stock: 3,
-    category: "Home",
+    category: "Home & Kitchen",
     images: [
       "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?q=80&w=600&auto=format&fit=crop"
     ],
@@ -261,7 +261,7 @@ const PRODUCTS = [
     discount: 5,
     rating: 4.5,
     stock: 45,
-    category: "Home",
+    category: "Home & Kitchen",
     images: [
       "https://images.unsplash.com/photo-1603006905003-be475563bc59?q=80&w=600&auto=format&fit=crop"
     ],
@@ -285,7 +285,7 @@ const PRODUCTS = [
     discount: 10,
     rating: 4.8,
     stock: 50,
-    category: "Grocery",
+    category: "Groceries",
     images: [
       "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?q=80&w=600&auto=format&fit=crop"
     ],
@@ -309,7 +309,7 @@ const PRODUCTS = [
     discount: 0,
     rating: 4.6,
     stock: 60,
-    category: "Beauty",
+    category: "Beauty & Personal Care",
     images: [
       "https://images.unsplash.com/photo-1608248597481-496100c8c836?q=80&w=600&auto=format&fit=crop"
     ],
@@ -1131,21 +1131,21 @@ const seedData = async () => {
 
     // Create Customer User
     const customer = await User.create({
-      name: "John Doe",
+      name: "Arun Kumar",
       email: "user@quickcart.com",
       password: "User@123",
       role: "customer",
-      phone: "+1 (555) 019-2834",
+      phone: "+91 98765 43210",
       avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=150&auto=format&fit=crop",
       address: {
-        street: "120 Vercel Way, Suite 400",
-        city: "San Francisco",
-        state: "CA",
-        zip: "94107",
-        country: "United States"
+        street: "123, Avinashi Road",
+        city: "Coimbatore",
+        state: "Tamil Nadu",
+        zip: "641018",
+        country: "India"
       }
     });
-    console.log("John Doe Customer seeded successfully.");
+    console.log("Arun Kumar Customer seeded successfully.");
 
     // Create initial order for Customer
     const timeline = [
@@ -1186,12 +1186,12 @@ const seedData = async () => {
         total: 1020.28
       },
       shippingAddress: {
-        name: "John Doe",
-        street: "120 Vercel Way, Suite 400",
-        city: "San Francisco",
-        state: "CA",
-        zip: "94107",
-        country: "United States"
+        name: "Arun Kumar",
+        street: "123, Avinashi Road",
+        city: "Coimbatore",
+        state: "Tamil Nadu",
+        zip: "641018",
+        country: "India"
       },
       paymentMethod: "Credit Card",
       timeline

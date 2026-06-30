@@ -157,7 +157,7 @@ export const Signup = () => {
               value={formData.name}
               onChange={handleInputChange}
               error={errors.name}
-              placeholder="e.g. Jane Doe"
+              placeholder="e.g. Arun Kumar"
               required
             />
 
@@ -168,7 +168,7 @@ export const Signup = () => {
               value={formData.email}
               onChange={handleInputChange}
               error={errors.email}
-              placeholder="e.g. jane@example.com"
+              placeholder="e.g. arun@example.com"
               required
             />
 
@@ -178,7 +178,7 @@ export const Signup = () => {
               value={formData.phone}
               onChange={handleInputChange}
               error={errors.phone}
-              placeholder="e.g. +1 (555) 012-3456"
+              placeholder="e.g. +91 98765 43210"
               required
             />
 

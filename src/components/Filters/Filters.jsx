@@ -68,7 +68,7 @@ export const Filters = ({
       {/* Price Range Filter */}
       <div>
         <h4 className="text-sm font-bold text-slate-800 dark:text-white mb-3 font-sans">
-          Max Price (${priceRange})
+          Max Price (₹{priceRange})
         </h4>
         <input
           type="range"
@@ -80,8 +80,8 @@ export const Filters = ({
           className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-primary"
         />
         <div className="flex justify-between text-xs text-slate-400 dark:text-slate-500 font-semibold mt-2">
-          <span>$0</span>
-          <span>$1500</span>
+          <span>₹0</span>
+          <span>₹1500</span>
         </div>
       </div>
 

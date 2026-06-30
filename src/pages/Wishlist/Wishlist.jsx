@@ -82,11 +82,11 @@ export const Wishlist = () => {
 
                   <div className="flex items-center space-x-2 mt-2">
                     <span className="text-base font-black text-slate-800 dark:text-white font-sans">
-                      ${finalPrice.toFixed(2)}
+                      ₹{finalPrice.toFixed(2)}
                     </span>
                     {discountPercent > 0 && (
                       <span className="text-xs text-slate-400 line-through">
-                        ${item.price.toFixed(2)}
+                        ₹{item.price.toFixed(2)}
                       </span>
                     )}
                   </div>

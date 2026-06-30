@@ -188,7 +188,7 @@ export const CartProvider = ({ children }) => {
 
   const discountedSubtotal = subtotal - discount;
   const tax = discountedSubtotal * 0.08; // 8% tax rate
-  const shipping = subtotal > 150 || cartItems.length === 0 ? 0.00 : 15.00; // Free shipping over $150
+  const shipping = subtotal > 499 || cartItems.length === 0 ? 0.00 : 49.00; // Free shipping over ₹499
   const grandTotal = discountedSubtotal + tax + shipping;
 
   return (

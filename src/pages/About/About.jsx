@@ -1,14 +1,14 @@
 import React from "react";
-import { Shield, Zap, Database, Server, Cpu, Globe } from "lucide-react";
+import { ShoppingBag, Sliders, Heart, Lock, Truck, Smartphone } from "lucide-react";
 
 export const About = () => {
-  const architecturalFeatures = [
-    { icon: Server, title: "AWS API Gateway", desc: "Standard entry points mapping client endpoints directly to microservices." },
-    { icon: Cpu, title: "AWS Lambda", desc: "Pay-per-use, trigger-based serverless compute running zero backend servers." },
-    { icon: Database, title: "Amazon DynamoDB", desc: "NoSQL, schema-free operational database optimized for horizontal scalability." },
-    { icon: Shield, title: "Amazon Cognito", desc: "Federated single sign-on security, managing token sign-ups and roles." },
-    { icon: Zap, title: "Amazon S3 & CDN", desc: "Vite static content assets distribution via CloudFront edge caches." },
-    { icon: Globe, title: "Multi-Region Ready", desc: "Global latency minimization via DNS routing and edge server deployments." }
+  const shoppingFeatures = [
+    { icon: ShoppingBag, title: "Wide Product Collection", desc: "Browse through our extensive catalog of handpicked products across fashion, electronics, home decor, and more." },
+    { icon: Sliders, title: "Smart Search & Filters", desc: "Find exactly what you are looking for in seconds with our advanced filtering and instant search options." },
+    { icon: Heart, title: "Wishlist Support", desc: "Save your favorite items to your personal wishlist and track them for price drops and restocks." },
+    { icon: Lock, title: "Secure Checkout", desc: "Shop with peace of mind using our end-to-end encrypted secure checkout with multiple payment modes." },
+    { icon: Truck, title: "Fast Delivery", desc: "Get your orders delivered swiftly and safely right to your doorstep, with real-time tracking updates." },
+    { icon: Smartphone, title: "Responsive Shopping Experience", desc: "Enjoy a smooth, seamless shopping experience on any device, whether you are on a phone, tablet, or laptop." }
   ];
 
   return (
@@ -21,38 +21,38 @@ export const About = () => {
             Our Vision
           </span>
           <h1 className="text-4xl sm:text-5xl font-extrabold font-sans text-slate-900 dark:text-white leading-tight">
-            Redefining E-Commerce with Serverless Architecture
+            Redefining Your Online Shopping Experience
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
-            QuickCart is a state-of-the-art catalog application designed to run entirely serverless. By decoupling the frontend and backend layers, we make database queries fast, secure, and incredibly cost-effective.
+            QuickCart is a premium online shopping platform designed to make digital storefronts accessible, lightning-fast, and user-friendly. We connect shoppers with high-quality products, affordable prices, and a reliable customer care network.
           </p>
           <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
-            Our templates look premium, perform with sub-second response times, and are fully structured for zero-effort AWS migrations.
+            Our catalog is curated with utmost care, ensuring every item meets our high standards of quality and value. We focus on providing a seamless interface, speedy deliveries, and helpful support.
           </p>
         </div>
 
         <div className="aspect-video rounded-[32px] overflow-hidden bg-slate-100 dark:bg-slate-900 border shadow-md relative">
           <img
-            src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=600&auto=format&fit=crop"
-            alt="Cloud Computing Architecture"
+            src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=600&auto=format&fit=crop"
+            alt="Online Shopping Experience"
             className="w-full h-full object-cover"
           />
         </div>
       </section>
 
-      {/* Cloud architecture section */}
+      {/* Shopping Features section */}
       <section className="space-y-12">
         <div className="text-center max-w-2xl mx-auto space-y-3">
           <h2 className="text-3xl font-extrabold font-sans text-slate-900 dark:text-white tracking-tight">
-            AWS Cloud Integration Ready
+            Designed for Modern Shoppers
           </h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base leading-relaxed">
-            QuickCart is architected from the ground up for serverless integrations. When you are ready, hook it up to AWS with zero redesigns.
+            We offer key services and storefront benefits to make sure you have a hassle-free, secure, and delightful experience.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 text-left">
-          {architecturalFeatures.map((feat, index) => {
+          {shoppingFeatures.map((feat, index) => {
             const FeatIcon = feat.icon;
             return (
               <div
